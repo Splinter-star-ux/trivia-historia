@@ -1,46 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mando Combatiente</title>
+    <title>Mando Rebelde - Trivia</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        body { background: #1a1d13; color: white; text-align: center; font-family: monospace; padding: 20px; }
-        input { padding: 15px; width: 80%; font-size: 18px; margin-bottom: 15px; }
-        button { background: #8b0000; color: white; padding: 15px; width: 85%; border: none; font-weight: bold; font-size: 18px; }
+        /* Ajustes específicos para el celular */
+        body {
+            padding: 20px;
+            flex-direction: column;
+        }
+        #mando-container {
+            background: rgba(43, 48, 32, 0.95);
+            border: 3px solid #ffca28;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .espera {
+            display: none;
+            color: #ffca28;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>MANDO REVOLUCIONARIO</h1>
-    <input type="text" id="nombreInput" placeholder="Tu nombre">
-    <br>
-    <button onclick="unirse()">UNIRSE A LA LUCHA</button>
+
+    <div id="mando-container">
+        <h2 style="color: #ffca28; text-shadow: 2px 2px #000;">MANDO DE COMBATE</h2>
+        
+        <div id="registro">
+            <p>Introduce tu nombre para unirte a la columna:</p>
+            <input type="text" id="nombre-jugador" placeholder="Ej: Camilo C." maxlength="15">
+            <button id="btn-unirse" style="width: 100%;">UNIRSE A LA LUCHA</button>
+        </div>
+
+        <div id="pantalla-espera" class="espera">
+            <h3 id="saludo">¡LISTO, COMBATIENTE!</h3>
+            <p>Espera a que el Comandante inicie la trivia en la pantalla principal.</p>
+            <div style="font-size: 3rem; margin-top: 20px;">🚩</div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyAihdShTcUkthaEwx1dXLNM_D0jQWVsNUs",
-        authDomain: "historia-revoluc.firebaseapp.com",
-        databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
-        projectId: "historia-revoluc",
-        storageBucket: "historia-revoluc.firebasestorage.app",
-        messagingSenderId: "383656491875",
-        appId: "1:383656491875:web:ff64b6e7997a889358f156"
-      };
-      
-      firebase.initializeApp(firebaseConfig);
-      const database = firebase.database();
 
-      function unirse() {
-          const nombre = document.getElementById('nombreInput').value;
-          if(nombre) {
-              database.ref('jugadores/' + nombre).set({
-                  nombre: nombre,
-                  puntos: 0
-              });
-              alert("¡Unido a la Sierra!");
-          }
-      }
+    <script>
+        // 1. TU CONFIGURACIÓN DE FIREBASE (Copia y pega la tuya aquí)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAihdShTcUkthaEwx1dXLNM_D0jQWVsNUs",
+            authDomain: "historia-revoluc.firebaseapp.com",
+            databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
+            projectId: "historia-revoluc",
+            storageBucket: "historia-revoluc.firebasestorage.app",
+            messagingSenderId: "383656491875",
+            appId: "1:383656491875:web:ff64b6e7997a889358f156"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 2. LÓGICA DEL MANDO
+        const btnUnirse = document.getElementById('btn-unirse');
+        const inputNombre = document.getElementById('nombre-jugador');
+        const registroDiv = document.getElementById('registro');
+        const esperaDiv = document.getElementById('pantalla-espera');
+        const saludoH3 = document.getElementById('saludo');
+
+        btnUnirse.addEventListener('click', () => {
+            const nombre = inputNombre.value.trim();
+
+            if (nombre.length > 2) {
+                // Guardar en Firebase
+                const nuevoJugadorRef = database.ref('jugadores').push();
+                nuevoJugadorRef.set({
+                    nombre: nombre,
+                    puntos: 0,
+                    fecha: Date.now()
+                });
+
+                // Cambiar interfaz
+                registroDiv.style.display = 'none';
+                esperaDiv.style.display = 'block';
+                saludoH3.innerText = `¡LISTO, ${nombre.toUpperCase()}!`;
+            } else {
+                alert("Escribe un nombre válido (mínimo 3 letras)");
+            }
+        });
     </script>
 </body>
 </html>

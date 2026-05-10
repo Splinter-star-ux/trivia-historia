@@ -11,9 +11,9 @@
 
     <div class="overlay">
         <div id="registro">
-            <h2 style="color:#ffca28; font-size: 24px;">UNIRSE A LA COLUMNA</h2>
-            <input type="text" id="nombre" placeholder="TU NOMBRE / ALIAS" style="padding:15px; width:80%; border-radius:5px; border:none; margin-bottom:20px; text-align:center;">
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #ffca28; font-weight:bold; width:80%;">ENTRAR EN COMBATE</button>
+            <h2 style="color:#ffca28;">UNIRSE A LA COLUMNA</h2>
+            <input type="text" id="nombre" placeholder="TU NOMBRE" style="padding:15px; width:80%; border-radius:5px; margin-bottom:20px; text-align:center;">
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; border:2px solid #ffca28; width:80%; font-weight:bold;">ENTRAR EN COMBATE</button>
         </div>
 
         <div id="espera" style="display:none; text-align:center;">
@@ -23,7 +23,7 @@
         </div>
 
         <div id="juego" style="display:none;">
-            <h2 style="color:#ffca28; margin-bottom:20px;">¡FUEGO!</h2>
+            <h2 style="color:#ffca28;">¡FUEGO!</h2>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:90vw;">
                 <button onclick="enviar('A')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">A</button>
                 <button onclick="enviar('B')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">B</button>
@@ -35,6 +35,50 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="app.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
+            authDomain: "historia-revoluc.firebaseapp.com",
+            databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
+            projectId: "historia-revoluc",
+            storageBucket: "historia-revoluc.firebasestorage.app",
+            messagingSenderId: "383656491875",
+            appId: "1:383656491875:web:d7111a270494cdcb58f156"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let miId = "";
+
+        document.getElementById('btn-unirse').onclick = () => {
+            const nom = document.getElementById('nombre').value.trim();
+            if(nom) {
+                const nuevo = db.ref('jugadores').push();
+                miId = nuevo.key;
+                nuevo.set({ nombre: nom, puntos: 0 });
+                document.getElementById('registro').style.display = 'none';
+                document.getElementById('espera').style.display = 'block';
+            }
+        };
+
+        window.enviar = (l) => {
+            if(miId) db.ref('respuestasRecibidas/' + miId).set({ opcion: l });
+        };
+
+        db.ref('estadoJuego').on('value', snap => {
+            const estado = snap.val() ? snap.val().estado : 'espera';
+            const bg = document.getElementById('bg-layer');
+            if(bg && miId) {
+                if(estado === 'jugando') {
+                    bg.className = 'juego-bg';
+                    document.getElementById('espera').style.display = 'none';
+                    document.getElementById('juego').style.display = 'block';
+                } else {
+                    bg.className = 'espera-bg';
+                    document.getElementById('espera').style.display = 'block';
+                    document.getElementById('juego').style.display = 'none';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

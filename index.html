@@ -6,41 +6,57 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; background: #000 url('fondo.jpg') no-repeat center center fixed; background-size: cover; color: white; font-family: 'Urbanist', sans-serif; overflow: hidden; }
-        .overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1; }
+        .overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 1; }
         .content { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .main-title { font-family: 'Playfair Display', serif; font-size: 50px; color: #f7e02e; text-transform: uppercase; margin: 0; }
+        .qr-section { background: rgba(20, 20, 20, 0.9); padding: 20px; border-radius: 15px; border: 2px solid #8B0000; margin-top: 10px; }
+        #qrcode { background: white; padding: 10px; border-radius: 10px; display: inline-block; }
         
-        .main-title { font-family: 'Playfair Display', serif; font-size: 60px; color: #f7e02e; text-transform: uppercase; margin: 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .qr-section { background: rgba(26, 26, 26, 0.9); padding: 30px; border-radius: 15px; border: 2px solid #8B0000; margin-top: 20px; }
-        .qr-box { background: white; padding: 10px; border-radius: 10px; display: inline-block; }
-        
-        .btn-mision { background: #8B0000; color: white; padding: 15px 40px; font-size: 20px; border: 2px solid #f7e02e; cursor: pointer; font-weight: bold; border-radius: 5px; margin-top: 20px; }
-        .btn-mision:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(247,224,46,0.4); }
-        
-        #game-area { display: none; width: 80%; }
-        .pregunta { font-size: 35px; color: #f7e02e; margin-bottom: 30px; font-family: 'Playfair Display'; }
-        .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
-        .opcion { background: rgba(139, 0, 0, 0.8); border: 2px solid #fff; padding: 20px; font-size: 24px; border-radius: 10px; }
+        /* Controles de Host */
+        .host-controls { margin-top: 20px; display: flex; gap: 10px; }
+        .btn { padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 5px; text-transform: uppercase; border: 2px solid #f7e02e; }
+        .btn-start { background: #8B0000; color: white; }
+        .btn-next { background: #2e7d32; color: white; display: none; }
+        .btn-reset { background: #444; color: #ccc; border-color: #666; }
+
+        /* Trivia */
+        #game-area { display: none; width: 85%; }
+        .pregunta { font-size: 32px; color: #f7e02e; margin-bottom: 20px; font-family: 'Playfair Display'; }
+        .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opcion { background: rgba(139, 0, 0, 0.8); border: 2px solid #fff; padding: 15px; font-size: 20px; border-radius: 8px; }
+        .correcta { background: #2e7d32 !important; border-color: #f7e02e !important; }
+
+        /* Ranking */
+        #leaderboard { margin-top: 20px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; min-width: 300px; }
     </style>
 </head>
 <body>
     <div class="overlay-bg"></div>
-
     <div class="content">
-        <div id="inicio">
+        
+        <div id="pantalla-inicio">
             <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
             <div class="qr-section">
-                <div id="qrcode" class="qr-box"></div>
-                <p>Escanea para unirte a la columna rebelde</p>
-                <button class="btn-mision" id="btn-start">INICIAR OPERACIÓN</button>
+                <div id="qrcode"></div>
+                <p>ESCANEEN PARA UNIRSE A LA COLUMNA</p>
             </div>
-            <p id="counter" style="margin-top:15px; color:#f7e02e;">Esperando combatientes...</p>
+            <div id="leaderboard">
+                <h3 style="color:#f7e02e; margin-top:0;">RANKING DE COMBATIENTES</h3>
+                <div id="lista-ranking">Esperando jugadores...</div>
+            </div>
+            <div class="host-controls">
+                <button class="btn btn-start" id="btn-iniciar">Empezar Juego</button>
+                <button class="btn btn-reset" onclick="reiniciarTodo()">Reiniciar Todo</button>
+            </div>
         </div>
 
         <div id="game-area">
-            <div id="countdown" style="font-size: 100px; color: #f7e02e;"></div>
-            <div id="trivia-content" style="display:none;">
-                <div class="pregunta" id="texto-pregunta"></div>
-                <div class="opciones" id="lista-opciones"></div>
+            <div id="pregunta-box">
+                <div class="pregunta" id="txt-pregunta"></div>
+                <div class="opciones" id="opciones-box"></div>
+            </div>
+            <div class="host-controls" style="justify-content: center;">
+                <button class="btn btn-next" id="btn-siguiente">Siguiente Pregunta</button>
             </div>
         </div>
     </div>
@@ -50,7 +66,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
+        const config = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",
             databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
@@ -59,57 +75,81 @@
             messagingSenderId: "383656491875",
             appId: "1:383656491875:web:d7111a270494cdcb58f156"
         };
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         const db = firebase.database();
 
-        // Generar QR
-        const urlFinal = window.location.href.replace("index.html", "control.html");
-        new QRCode(document.getElementById("qrcode"), { text: urlFinal, width: 180, height: 180 });
+        // Generar QR dinámico (detecta si es local o web)
+        const linkMando = window.location.href.includes('index.html') 
+            ? window.location.href.replace('index.html', 'control.html') 
+            : window.location.href + 'control.html';
+        new QRCode(document.getElementById("qrcode"), { text: linkMando, width: 160, height: 160 });
 
-        // Preguntas
-        const preguntas = [
-            { p: "¿Quién lideró el asalto al Cuartel Moncada?", o: ["Fulgencio Batista", "Fidel Castro", "Che Guevara", "Camilo Cienfuegos"], c: 1 },
-            { p: "¿En qué año triunfó la Revolución?", o: ["1953", "1959", "1961", "1952"], c: 1 },
-            { p: "¿Cuál era el nombre del yate que transportó a los rebeldes?", o: ["Santa María", "Granma", "Victory", "Piraña"], c: 1 }
+        const bancoPreguntas = [
+            { p: "¿En qué año triunfó la Revolución Cubana?", o: ["1953", "1959", "1961", "1952"], c: 1 },
+            { p: "¿Quién lideró la columna 'Ciro Redondo'?", o: ["Fidel Castro", "Che Guevara", "Camilo Cienfuegos", "Raúl Castro"], c: 1 },
+            { p: "¿Cuál era el nombre del yate de la expedición rebelde?", o: ["Piraña", "Granma", "Santa María", "Victoria"], c: 1 }
         ];
 
-        // Lógica de Inicio
-        document.getElementById('btn-start').onclick = () => {
-            document.getElementById('inicio').style.display = 'none';
+        let indexActual = 0;
+
+        // Iniciar Juego
+        document.getElementById('btn-iniciar').onclick = () => {
+            document.getElementById('pantalla-inicio').style.display = 'none';
             document.getElementById('game-area').style.display = 'block';
-            db.ref('estadoJuego').set({ estado: 'jugando' });
-            lanzarTrivia();
+            document.getElementById('btn-siguiente').style.display = 'block';
+            cargarPregunta(0);
         };
 
-        function lanzarTrivia() {
-            let count = 3;
-            const cd = document.getElementById('countdown');
-            const timer = setInterval(() => {
-                cd.innerText = count;
-                if(count === 0) {
-                    clearInterval(timer);
-                    cd.style.display = 'none';
-                    document.getElementById('trivia-content').style.display = 'block';
-                    mostrarPregunta(0);
-                }
-                count--;
-            }, 1000);
-        }
+        function cargarPregunta(idx) {
+            indexActual = idx;
+            const item = bancoPreguntas[idx];
+            db.ref('estadoJuego').set({ estado: 'jugando', pIdx: idx });
+            db.ref('respuestasRecibidas').remove(); // Limpiar respuestas previas
 
-        function mostrarPregunta(index) {
-            const current = preguntas[index];
-            document.getElementById('texto-pregunta').innerText = current.p;
-            const lista = document.getElementById('lista-opciones');
-            lista.innerHTML = "";
-            current.o.forEach((opt, i) => {
-                lista.innerHTML += `<div class="opcion">${String.fromCharCode(65+i)}) ${opt}</div>`;
+            document.getElementById('txt-pregunta').innerText = item.p;
+            const box = document.getElementById('opciones-box');
+            box.innerHTML = "";
+            item.o.forEach((opt, i) => {
+                box.innerHTML += `<div class="opcion" id="opt-${i}">${String.fromCharCode(65+i)}) ${opt}</div>`;
             });
         }
 
-        // Contador de jugadores
-        db.ref('jugadores').on('value', s => {
-            document.getElementById('counter').innerText = s.numChildren() + " Combatientes en línea";
+        // Botón Siguiente
+        document.getElementById('btn-siguiente').onclick = () => {
+            if(indexActual < bancoPreguntas.length - 1) {
+                cargarPregunta(indexActual + 1);
+            } else {
+                alert("¡Fin de la trivia!");
+                reiniciarTodo();
+            }
+        };
+
+        // Escuchar respuestas y sumar puntos
+        db.ref('respuestasRecibidas').on('child_added', snap => {
+            const r = snap.val();
+            const correctIdx = bancoPreguntas[indexActual].c;
+            if(parseInt(r.opcionIdx) === correctIdx) {
+                db.ref('jugadores/' + snap.key + '/puntos').transaction(p => (p || 0) + 10);
+            }
         });
+
+        // Ranking en tiempo real
+        db.ref('jugadores').on('value', s => {
+            const players = [];
+            s.forEach(child => { players.push(child.val()); });
+            players.sort((a,b) => b.puntos - a.puntos);
+            
+            document.getElementById('lista-ranking').innerHTML = players.map(p => 
+                `<div>${p.nombre}: <b>${p.puntos || 0} pts</b></div>`
+            ).join('');
+        });
+
+        function reiniciarTodo() {
+            if(confirm("¿Borrar todo y empezar de cero?")) {
+                db.ref('/').remove();
+                location.reload();
+            }
+        }
     </script>
 </body>
 </html>

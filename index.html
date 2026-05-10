@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revolución bajo el sol del Caribe</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,12 +15,12 @@
         <p class="sub-titulo">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
 
         <div id="setup">
-            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; margin: 20px; min-width: 180px; min-height: 180px;"></div>
+            <div id="qrcode" style="background: white; padding: 15px; display: inline-block; margin: 20px; border-radius: 10px;"></div>
             <p>Escanea para unirte a la columna rebelde</p>
-            <button id="btn-iniciar">INICIAR OPERACIÓN</button>
+            <button id="btn-iniciar" style="background: #8b0000; color: white; padding: 15px 30px; cursor: pointer; border: 2px solid #ffca28; font-weight: bold;">INICIAR OPERACIÓN</button>
         </div>
 
-        <button id="btn-reiniciar" style="background: #444; color: white; margin-top: 20px; cursor: pointer;">LIMPIAR PARTIDA</button>
+        <button id="btn-reiniciar" style="background: #333; color: #ccc; margin-top: 20px; padding: 10px; cursor: pointer; border: none;">LIMPIAR PARTIDA</button>
 
         <div id="ranking">
             <h3>COMBATIENTES EN LÍNEA:</h3>
@@ -26,10 +28,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-
     <script>
+        // 1. Configuración de Firebase (Sacada de tu imagen)
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",
@@ -39,9 +39,58 @@
             messagingSenderId: "383656491875",
             appId: "1:383656491875:web:d7111a270494cdcb58f156"
         };
+        
         firebase.initializeApp(firebaseConfig);
-        window.database = firebase.database();
+        const db = firebase.database();
+        const jugadoresRef = db.ref('jugadores');
+        const juegoRef = db.ref('estadoJuego');
+
+        // 2. Generar el QR Automáticamente
+        function crearQR() {
+            const qrDiv = document.getElementById("qrcode");
+            qrDiv.innerHTML = "";
+            const urlMando = window.location.href.replace("index.html", "") + "control.html";
+            
+            new QRCode(qrDiv, {
+                text: urlMando,
+                width: 200,
+                height: 200
+            });
+        }
+
+        // 3. Lógica de los botones
+        document.getElementById('btn-iniciar').onclick = function() {
+            juegoRef.set({ estado: 'jugando' }).then(() => {
+                document.getElementById('setup').innerHTML = "<h2 style='color:#ffca28;'>¡OPERACIÓN EN CURSO!</h2><p>Los rebeldes están atacando...</p>";
+            });
+        };
+
+        document.getElementById('btn-reiniciar').onclick = function() {
+            if(confirm("¿Limpiar todos los datos?")) {
+                jugadoresRef.remove();
+                juegoRef.set({ estado: 'espera' }).then(() => {
+                    location.reload();
+                });
+            }
+        };
+
+        // 4. Mostrar jugadores
+        jugadoresRef.on('value', (snap) => {
+            const lista = document.getElementById('lista-jugadores');
+            lista.innerHTML = "";
+            snap.forEach((child) => {
+                const li = document.createElement('li');
+                li.style.color = "white";
+                li.innerHTML = "🚩 " + child.val().nombre + " - LISTO";
+                lista.appendChild(li);
+            });
+        });
+
+        // Al cargar la página
+        window.onload = function() {
+            crearQR();
+            juegoRef.set({ estado: 'espera' });
+        };
     </script>
-    <script src="app.js"></script>
 </body>
 </html>

@@ -1,47 +1,55 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revolución bajo el sol del Caribe</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="game-container">
-        <h1>REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
-        <p class="sub-titulo">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
+const jugadoresRef = database.ref('jugadores');
+const juegoRef = database.ref('estadoJuego');
 
-        <div id="setup">
-            <div id="qrcode" style="display: flex; justify-content: center; margin: 20px;"></div>
-            <p>Escanea para unirte a la columna rebelde</p>
-            <button id="btn-iniciar">INICIAR OPERACIÓN</button>
-            <br>
-            <button id="btn-reiniciar" style="background: #444; margin-top: 15px; font-size: 0.8rem;">LIMPIAR PARTIDAAnterior</button>
-        </div>
+// Resetear estado al abrir la página
+juegoRef.set({ estado: 'espera' });
 
-        <div id="ranking">
-            <h3>COMBATIENTES EN LÍNEA:</h3>
-            <ul id="lista-jugadores"></ul>
-        </div>
-    </div>
+const generarQR = () => {
+    const qrDiv = document.getElementById("qrcode");
+    if (qrDiv) {
+        qrDiv.innerHTML = ""; 
+        let urlBase = window.location.href.split('index.html')[0];
+        if (!urlBase.endsWith('/')) urlBase += '/';
+        const urlMando = urlBase + 'control.html';
+        new QRCode(qrDiv, { text: urlMando, width: 180, height: 180 });
+    }
+};
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+// Actualizar lista de jugadores en tiempo real
+jugadoresRef.on('value', (snapshot) => {
+    const lista = document.getElementById('lista-jugadores');
+    if (lista) {
+        lista.innerHTML = ""; 
+        snapshot.forEach((child) => {
+            const li = document.createElement('li');
+            li.innerHTML = `🚩 <span>${child.val().nombre}</span> - LISTO`;
+            lista.appendChild(li);
+        });
+    }
+});
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
-            authDomain: "historia-revoluc.firebaseapp.com",
-            databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
-            projectId: "historia-revoluc",
-            storageBucket: "historia-revoluc.firebasestorage.app",
-            messagingSenderId: "383656491875",
-            appId: "1:383656491875:web:d7111a270494cdcb58f156"
-        };
-        firebase.initializeApp(firebaseConfig);
-        window.database = firebase.database();
-    </script>
-    <script src="app.js"></script>
-</body>
-</html>
+// Lógica del botón INICIAR
+const btnIniciar = document.getElementById('btn-iniciar');
+if(btnIniciar) {
+    btnIniciar.onclick = () => {
+        document.getElementById('setup').innerHTML = `
+            <h2 style="color:#ffca28;">¡MISIÓN EN CURSO!</h2>
+            <p>Atención a los mandos móviles.</p>
+        `;
+        juegoRef.set({ estado: 'jugando' });
+    };
+}
+
+// Lógica del botón REINICIAR (El que limpia todo)
+document.getElementById('btn-reiniciar').onclick = () => {
+    if(confirm("¿Quieres borrar los jugadores y reiniciar la sala?")) {
+        // 1. Borramos jugadores
+        jugadoresRef.remove();
+        // 2. Volvemos el juego a espera
+        juegoRef.set({ estado: 'espera' });
+        // 3. Recargamos la página para que el QR y todo se limpie
+        setTimeout(() => { location.reload(); }, 500);
+    }
+};
+
+window.onload = generarQR;

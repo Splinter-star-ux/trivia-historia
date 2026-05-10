@@ -17,12 +17,15 @@
         }
         .gif-rebelde { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Botones corregidos */
-        .btn-op { width: 85%; height: 80px; margin: 10px 0; background: rgba(255,255,255,0.1); color: white; border: 2px solid white; font-size: 35px; border-radius: 15px; font-weight: bold; display: block; }
+        /* Botones */
+        .btn-op { width: 85%; height: 80px; margin: 10px 0; background: rgba(255,255,255,0.1); color: white; border: 2px solid white; font-size: 35px; border-radius: 15px; font-weight: bold; }
         .btn-op:active { background: #8b0000; transform: scale(0.95); }
         
         input { padding: 15px; width: 80%; border-radius: 10px; border: none; text-align: center; font-size: 18px; margin-bottom: 20px; }
         .btn-unirse { background: #8b0000; color: white; padding: 15px; width: 85%; border: 2px solid #f7e02e; border-radius: 10px; font-weight: bold; font-size: 18px; }
+
+        /* Contenedor de botones oculto por defecto */
+        #botones { display: none; width: 100%; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
@@ -42,7 +45,7 @@
             <p id="msg-sub" style="color: #ccc;">Espera órdenes del Comandante Piro...</p>
         </div>
 
-        <div id="botones" style="display:none; width:100%; text-align: center; display: flex; flex-direction: column; align-items: center;">
+        <div id="botones">
             <button onclick="enviar(0)" class="btn-op">A</button>
             <button onclick="enviar(1)" class="btn-op">B</button>
             <button onclick="enviar(2)" class="btn-op">C</button>
@@ -75,6 +78,7 @@
                 ref.set({ nombre: n, puntos: 0 });
                 document.getElementById('registro').style.display = 'none';
                 document.getElementById('espera').style.display = 'block';
+                document.getElementById('botones').style.display = 'none'; // Asegura que no se vean al entrar
             }
         };
 
@@ -91,12 +95,12 @@
             const data = snap.val();
             if(data && data.estado === 'jugando' && miId) {
                 document.getElementById('espera').style.display = 'none';
-                document.getElementById('botones').style.display = 'flex';
+                document.getElementById('botones').style.display = 'flex'; // Solo aparece aquí
                 document.getElementById('msg-status').innerText = "¡EN POSICIÓN!";
-            } else if (data && data.estado === 'finalizado') {
+            } else {
+                // En cualquier otro caso (espera, finalizado, etc.), ocultamos botones y mostramos rana
                 document.getElementById('botones').style.display = 'none';
-                document.getElementById('espera').style.display = 'block';
-                document.getElementById('msg-status').innerText = "¡FIN!";
+                if(miId) document.getElementById('espera').style.display = 'block';
             }
         });
 

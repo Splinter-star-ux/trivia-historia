@@ -7,29 +7,30 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body { background: #2b3020; color: white; text-align: center; padding: 20px; font-family: sans-serif; }
-        input { padding: 15px; width: 80%; margin: 20px 0; border: none; border-radius: 5px; }
-        button { background: #8b0000; color: white; padding: 15px; border: 2px solid #ffca28; width: 85%; font-weight: bold; }
-        .opcion { background: #444; margin: 10px 0; }
+        input { padding: 15px; width: 85%; margin: 20px 0; border: none; border-radius: 5px; font-size: 1.1rem; }
+        button { background: #8b0000; color: white; padding: 15px; border: 2px solid #ffca28; width: 90%; font-weight: bold; cursor: pointer; }
+        .opcion { background: #3e4431; margin: 10px 0; border: 1px solid #ffca28; }
     </style>
 </head>
 <body>
     <div id="mando-box">
         <div id="pantalla-registro">
-            <h2 style="color:#ffca28;">IDENTIFÍCATE</h2>
-            <input type="text" id="nombre" placeholder="Tu nombre o apodo">
-            <button id="btn-unirse">UNIRSE AL COMBATE</button>
+            <h2 style="color:#ffca28;">NUEVO RECLUTA</h2>
+            <input type="text" id="nombre" placeholder="Tu nombre">
+            <button id="btn-unirse">UNIRSE A LA LUCHA</button>
         </div>
 
         <div id="pantalla-espera" style="display:none;">
             <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
-            <p>Espera a que el Comandante inicie la operación en la pantalla.</p>
+            <p>Espera a que el Comandante inicie la operación.</p>
+            <div style="font-size: 4rem; margin-top: 20px;">⭐</div>
         </div>
 
         <div id="pantalla-juego" style="display:none;">
-            <h2 style="color:#ffca28;">ELIGE TU ATAQUE</h2>
-            <button class="opcion" onclick="enviar('A')">OPCIÓN A</button>
-            <button class="opcion" onclick="enviar('B')">OPCIÓN B</button>
-            <button class="opcion" onclick="enviar('C')">OPCIÓN C</button>
+            <h2 style="color:#ffca28;">¡FUEGO!</h2>
+            <button class="opcion" onclick="enviar('A')">A</button>
+            <button class="opcion" onclick="enviar('B')">B</button>
+            <button class="opcion" onclick="enviar('C')">C</button>
         </div>
     </div>
 
@@ -66,7 +67,7 @@
             }
         });
 
-        function enviar(letra) { alert("Respuesta " + letra + " enviada."); }
+        function enviar(letra) { alert("Respuesta " + letra + " registrada."); }
     </script>
 </body>
 </html>

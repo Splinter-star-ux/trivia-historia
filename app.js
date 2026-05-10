@@ -1,6 +1,7 @@
 const jugadoresRef = database.ref('jugadores');
 const juegoRef = database.ref('estadoJuego');
 
+// Generar QR hacia el mando
 const generarQR = () => {
     const qrDiv = document.getElementById("qrcode");
     if (qrDiv) {
@@ -14,21 +15,24 @@ const generarQR = () => {
             width: 180,
             height: 180
         });
+        console.log("QR listo hacia: " + urlMando);
     }
 };
 
+// Escuchar quién se conecta
 jugadoresRef.on('value', (snapshot) => {
     const lista = document.getElementById('lista-jugadores');
     if (lista) {
         lista.innerHTML = ""; 
         snapshot.forEach((child) => {
             const li = document.createElement('li');
-            li.innerHTML = `🚩 <span>${child.val().nombre}</span>`;
+            li.innerHTML = `🚩 <span>${child.val().nombre}</span> - LISTO`;
             lista.appendChild(li);
         });
     }
 });
 
+// Botón de inicio
 document.getElementById('btn-iniciar').addEventListener('click', () => {
     document.getElementById('setup').innerHTML = `
         <div style="padding:20px; border:2px solid #ffca28; background:rgba(0,0,0,0.5);">
@@ -39,4 +43,5 @@ document.getElementById('btn-iniciar').addEventListener('click', () => {
     juegoRef.set({ estado: 'jugando' });
 });
 
+// Arrancar QR al cargar
 window.onload = generarQR;

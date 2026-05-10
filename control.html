@@ -5,36 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mando Rebelde</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #2b3020; color: white; text-align: center; padding: 20px; font-family: sans-serif; }
+        input { padding: 15px; width: 85%; margin: 20px 0; border: none; border-radius: 5px; font-size: 1.1rem; }
+        button { background: #8b0000; color: white; padding: 15px; border: 2px solid #ffca28; width: 90%; font-weight: bold; cursor: pointer; }
+        .opcion { background: #3e4431; margin: 10px 0; border: 1px solid #ffca28; font-size: 1.2rem; }
+    </style>
 </head>
 <body>
-    <div id="bg-layer" class="espera-bg"></div>
-
-    <div class="overlay">
-        <div id="registro">
+    <div id="mando-box">
+        <div id="pantalla-registro">
             <h2 style="color:#ffca28;">UNIRSE A LA COLUMNA</h2>
-            <input type="text" id="nombre" placeholder="TU NOMBRE" style="padding:15px; width:80%; border-radius:5px; margin-bottom:20px; text-align:center;">
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; border:2px solid #ffca28; width:80%; font-weight:bold;">ENTRAR EN COMBATE</button>
+            <input type="text" id="nombre" placeholder="Tu nombre">
+            <button id="btn-unirse">ENTRAR EN COMBATE</button>
         </div>
 
-        <div id="espera" style="display:none; text-align:center;">
+        <div id="pantalla-espera" style="display:none;">
             <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
-            <p>Espera órdenes del Comandante...</p>
-            <div style="font-size: 60px; margin-top: 20px;">🚩</div>
+            <p>Espera a que el Comandante inicie la operación.</p>
+            <div style="font-size: 4rem; margin-top: 20px;">⭐</div>
         </div>
 
-        <div id="juego" style="display:none;">
+        <div id="pantalla-juego" style="display:none;">
             <h2 style="color:#ffca28;">¡FUEGO!</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:90vw;">
-                <button onclick="enviar('A')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">A</button>
-                <button onclick="enviar('B')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">B</button>
-                <button onclick="enviar('C')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">C</button>
-                <button onclick="enviar('D')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">D</button>
-            </div>
+            <button class="opcion" onclick="alert('Opción A enviada')">A</button>
+            <button class="opcion" onclick="alert('Opción B enviada')">B</button>
+            <button class="opcion" onclick="alert('Opción C enviada')">C</button>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
@@ -47,35 +49,32 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let miId = "";
+
+        let yaRegistrado = false;
 
         document.getElementById('btn-unirse').onclick = () => {
             const nom = document.getElementById('nombre').value.trim();
             if(nom) {
-                const nuevo = db.ref('jugadores').push();
-                miId = nuevo.key;
-                nuevo.set({ nombre: nom, puntos: 0 });
-                document.getElementById('registro').style.display = 'none';
-                document.getElementById('espera').style.display = 'block';
+                db.ref('jugadores').push({ nombre: nom });
+                document.getElementById('pantalla-registro').style.display = 'none';
+                document.getElementById('pantalla-espera').style.display = 'block';
+                yaRegistrado = true;
             }
         };
 
-        window.enviar = (l) => {
-            if(miId) db.ref('respuestasRecibidas/' + miId).set({ opcion: l });
-        };
-
-        db.ref('estadoJuego').on('value', snap => {
-            const estado = snap.val() ? snap.val().estado : 'espera';
-            const bg = document.getElementById('bg-layer');
-            if(bg && miId) {
-                if(estado === 'jugando') {
-                    bg.className = 'juego-bg';
-                    document.getElementById('espera').style.display = 'none';
-                    document.getElementById('juego').style.display = 'block';
+        // Escuchar el estado del juego para cambiar de pantalla
+        db.ref('estadoJuego').on('value', (snap) => {
+            const data = snap.val();
+            if (yaRegistrado && data) {
+                const pEspera = document.getElementById('pantalla-espera');
+                const pJuego = document.getElementById('pantalla-juego');
+                
+                if (data.estado === 'jugando') {
+                    pEspera.style.display = 'none';
+                    pJuego.style.display = 'block';
                 } else {
-                    bg.className = 'espera-bg';
-                    document.getElementById('espera').style.display = 'block';
-                    document.getElementById('juego').style.display = 'none';
+                    pEspera.style.display = 'block';
+                    pJuego.style.display = 'none';
                 }
             }
         });

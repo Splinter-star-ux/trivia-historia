@@ -9,28 +9,31 @@
         .overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 1; }
         .content { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        .main-title { font-family: 'Playfair Display', serif; font-size: 55px; color: #f7e02e; text-transform: uppercase; margin: 0; }
+        .main-title { font-family: 'Playfair Display', serif; font-size: 50px; color: #f7e02e; text-transform: uppercase; margin: 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
         
-        /* Animaciones */
-        #animacion-preparados { font-size: 50px; color: #f7e02e; display: none; animation: zoom 1s infinite alternate; font-family: 'Playfair Display'; }
+        /* Animación "Preparados" */
+        #animacion-preparados { font-size: 50px; color: #f7e02e; display: none; animation: zoom 0.8s infinite alternate; font-family: 'Playfair Display'; }
         @keyframes zoom { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-        /* Trivia */
+        /* Estilo del QR */
+        #qrcode { background: white; padding: 15px; border-radius: 10px; display: inline-block; margin: 20px; box-shadow: 0 0 20px rgba(247,224,46,0.3); }
+
+        /* Trivia y Opciones */
         #game-area { display: none; width: 90%; }
         .pregunta { font-size: 38px; color: #f7e02e; margin-bottom: 30px; font-family: 'Playfair Display'; }
         .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .opcion { background: rgba(139, 0, 0, 0.8); border: 2px solid #fff; padding: 20px; font-size: 24px; border-radius: 10px; }
 
-        /* Notificaciones de acierto */
-        #notificaciones { position: absolute; right: 20px; top: 20px; width: 250px; }
-        .toast-acierto { background: #2e7d32; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; animation: slideIn 0.5s; }
+        /* Toasts de Acierto */
+        #notificaciones { position: absolute; right: 20px; top: 20px; width: 280px; z-index: 100; }
+        .toast-acierto { background: #2e7d32; color: white; padding: 15px; margin-bottom: 10px; border-left: 5px solid #f7e02e; border-radius: 5px; animation: slideIn 0.4s ease-out; font-weight: bold; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* Ranking Final */
-        #ranking-final { display: none; background: rgba(20,20,20,0.95); padding: 40px; border-radius: 20px; border: 3px solid #f7e02e; }
-        .rank-item { font-size: 28px; margin: 10px 0; border-bottom: 1px solid #444; padding: 10px; }
+        /* Ranking */
+        #ranking-final { display: none; background: rgba(15,15,15,0.95); padding: 40px; border-radius: 20px; border: 3px solid #f7e02e; width: 60%; }
+        .rank-item { font-size: 30px; margin: 15px 0; border-bottom: 1px solid #444; padding: 10px; display: flex; justify-content: space-between; }
         
-        .btn-host { background: #8B0000; color: white; padding: 12px 30px; border: 2px solid #f7e02e; cursor: pointer; font-weight: bold; margin: 10px; }
+        .btn-host { background: #8B0000; color: white; padding: 15px 35px; border: 2px solid #f7e02e; cursor: pointer; font-weight: bold; margin-top: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -40,24 +43,22 @@
     <div class="content">
         <div id="pantalla-inicio">
             <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
-            <div id="qrcode" style="background:white; padding:10px; display:inline-block; margin:20px; border-radius:10px;"></div>
-            <p>ESCANEEN PARA UNIRSE A LA COLUMNA</p>
-            <div id="lista-conectados" style="margin-bottom:20px; font-weight:bold; color:#f7e02e;">0 Combatientes listos</div>
-            <button class="btn-host" id="btn-preparados">¡PREPARADOS!</button>
+            <div id="qrcode"></div>
+            <p style="letter-spacing: 2px;">ESCANEEN PARA UNIRSE A LA COLUMNA</p>
+            <div id="lista-conectados" style="color:#f7e02e; font-weight:bold; margin:15px;">0 Combatientes listos</div>
+            <button class="btn-host" id="btn-preparar">¡COMENZAR DESAFÍO!</button>
         </div>
 
         <div id="animacion-preparados">¿PREPARADOS PARA DESAFIAR SUS CONOCIMIENTOS?</div>
 
         <div id="game-area">
-            <div id="pregunta-box">
-                <div class="pregunta" id="txt-pregunta"></div>
-                <div class="opciones" id="opciones-box"></div>
-            </div>
-            <button class="btn-host" id="btn-siguiente" style="margin-top:30px;">Siguiente Pregunta</button>
+            <div class="pregunta" id="txt-pregunta"></div>
+            <div class="opciones" id="opciones-box"></div>
+            <button class="btn-host" id="btn-siguiente">Siguiente Pregunta</button>
         </div>
 
         <div id="ranking-final">
-            <h1 style="color:#f7e02e; font-family:'Playfair Display';">🏆 CUADRO DE HONOR 🏆</h1>
+            <h1 style="color:#f7e02e; font-family:'Playfair Display'; font-size: 50px;">🏆 CUADRO DE HONOR 🏆</h1>
             <div id="lista-ganadores"></div>
             <button class="btn-host" onclick="location.reload()">Reiniciar Misión</button>
         </div>
@@ -80,29 +81,29 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        // Generar QR
-        const link = window.location.href.replace('index.html', 'control.html');
-        new QRCode(document.getElementById("qrcode"), { text: link, width: 160, height: 160 });
+        // GENERADOR DE QR MEJORADO (FUERZA CONTROL.HTML)
+        const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        const urlMando = window.location.origin + path + "control.html";
+        new QRCode(document.getElementById("qrcode"), { text: urlMando, width: 180, height: 180 });
 
         const preguntas = [
             { p: "¿Qué acción marcó el inicio del movimiento el 26 de julio de 1953?", o: ["El asalto al Cuartel Moncada", "La llegada del yate Granma", "La firma de la Constitución"], c: 0 },
             { p: "¿Qué líder revolucionario NO era de nacionalidad cubana?", o: ["Camilo Cienfuegos", "Ernesto 'Che' Guevara", "Raúl Castro"], c: 1 },
-            { p: "¿En qué embarcación viajaron los 82 revolucionarios desde México a Cuba?", o: ["El acorazado 'Victoria'", "El barco 'Sierra Maestra'", "El yate 'Granma'"], c: 2 },
+            { p: "¿En qué embarcación viajaron los 82 revolucionarios?", o: ["El acorazado 'Victoria'", "El barco 'Sierra Maestra'", "El yate 'Granma'"], c: 2 },
             { p: "¿En qué fecha huyó el dictador Fulgencio Batista?", o: ["1 de enero de 1959", "24 de diciembre de 1958", "10 de octubre de 1960"], c: 0 },
-            { p: "¿Dónde se refugiaron los rebeldes para organizar la guerra de guerrillas?", o: ["En la Habana Vieja", "En la Sierra Maestra", "En la Bahía de Cochinos"], c: 1 },
-            { p: "¿Cuál fue la primera gran medida social para ayudar a los campesinos?", o: ["La Ley del Turismo", "La Ley de Reforma Agraria", "La Ley de Libre Comercio"], c: 1 },
-            { p: "¿Cómo se llamaba la emisora que transmitía los mensajes rebeldes?", o: ["Voz de la Libertad", "Radio Habana", "Radio Rebelde"], c: 2 }
+            { p: "¿Dónde se refugiaron los rebeldes para organizar la guerra?", o: ["En la Habana Vieja", "En la Sierra Maestra", "En la Bahía de Cochinos"], c: 1 },
+            { p: "¿Cuál fue la primera gran medida social para los campesinos?", o: ["La Ley del Turismo", "La Ley de Reforma Agraria", "La Ley de Libre Comercio"], c: 1 },
+            { p: "¿Cómo se llamaba la emisora que transmitía desde la selva?", o: ["Voz de la Libertad", "Radio Habana", "Radio Rebelde"], c: 2 }
         ];
 
         let idx = 0;
         let jugadores = {};
 
-        // 1. Mostrar Animación de Preparados
-        document.getElementById('btn-preparados').onclick = () => {
+        // Sistema de Flujo
+        document.getElementById('btn-preparar').onclick = () => {
             document.getElementById('pantalla-inicio').style.display = 'none';
             const anim = document.getElementById('animacion-preparados');
             anim.style.display = 'block';
-            
             setTimeout(() => {
                 anim.style.display = 'none';
                 document.getElementById('game-area').style.display = 'block';
@@ -112,54 +113,46 @@
 
         function lanzarPregunta(n) {
             idx = n;
-            const q = preguntas[idx];
-            db.ref('estadoJuego').set({ estado: 'jugando', pIdx: idx });
+            db.ref('estadoJuego').set({ estado: 'jugando', pIdx: n, timestamp: Date.now() });
             db.ref('respuestasRecibidas').remove();
-
-            document.getElementById('txt-pregunta').innerText = q.p;
+            
+            document.getElementById('txt-pregunta').innerText = preguntas[n].p;
             const box = document.getElementById('opciones-box');
             box.innerHTML = "";
-            q.o.forEach((opt, i) => {
+            preguntas[n].o.forEach((opt, i) => {
                 box.innerHTML += `<div class="opcion">${String.fromCharCode(65+i)}) ${opt}</div>`;
             });
         }
 
         document.getElementById('btn-siguiente').onclick = () => {
             if(idx < preguntas.length - 1) lanzarPregunta(idx + 1);
-            else mostrarRankingFinal();
+            else finalizarJuego();
         };
 
-        // 2. Notificaciones y Puntos
+        // Escuchar respuestas y mostrar Toasts
         db.ref('respuestasRecibidas').on('child_added', snap => {
-            const res = snap.val();
-            const player = jugadores[snap.key];
-            if(player && parseInt(res.opIdx) === preguntas[idx].c) {
-                // Sumar puntos
-                db.ref('jugadores/' + snap.key + '/puntos').transaction(p => (p || 0) + 10);
+            const r = snap.val();
+            const p = jugadores[snap.key];
+            if(p && parseInt(r.opIdx) === preguntas[idx].c) {
+                db.ref('jugadores/' + snap.key + '/puntos').transaction(pts => (pts || 0) + 10);
                 
-                // Mostrar en pantalla
                 const toast = document.createElement('div');
                 toast.className = 'toast-acierto';
-                toast.innerHTML = `⭐ <b>${player.nombre}</b> acertó! (+10 pts)`;
+                toast.innerHTML = `⭐ ${p.nombre} ACERTÓ! <br> <small>Puntos totales: ${(p.puntos || 0) + 10}</small>`;
                 document.getElementById('notificaciones').appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
+                setTimeout(() => toast.remove(), 2500);
             }
         });
 
-        db.ref('jugadores').on('value', s => { 
-            jugadores = s.val() || {}; 
-            document.getElementById('lista-conectados').innerText = s.numChildren() + " Combatientes listos";
-        });
+        db.ref('jugadores').on('value', s => { jugadores = s.val() || {}; document.getElementById('lista-conectados').innerText = s.numChildren() + " Combatientes listos"; });
 
-        function mostrarRankingFinal() {
+        function finalizarJuego() {
             document.getElementById('game-area').style.display = 'none';
+            db.ref('estadoJuego').set({ estado: 'finalizado' });
             const rf = document.getElementById('ranking-final');
             rf.style.display = 'block';
-            
             const sorted = Object.values(jugadores).sort((a,b) => b.puntos - a.puntos);
-            document.getElementById('lista-ganadores').innerHTML = sorted.map((p, i) => 
-                `<div class="rank-item">${i+1}. ${p.nombre} — <b>${p.puntos || 0} pts</b></div>`
-            ).join('');
+            document.getElementById('lista-ganadores').innerHTML = sorted.map((p, i) => `<div class="rank-item"><span>${i+1}. ${p.nombre}</span> <b>${p.puntos || 0} PTS</b></div>`).join('');
         }
     </script>
 </body>

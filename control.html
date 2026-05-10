@@ -10,19 +10,19 @@
     <div id="bg-layer" class="espera-bg"></div>
     <div class="overlay">
         <div id="registro">
-            <h2 style="color:#f7e02e;">TU NOMBRE</h2>
-            <input type="text" id="nombre" style="padding:15px; width:80%; border-radius:10px; border:none; text-align:center;">
+            <h2 style="color:#f7e02e; text-shadow: 2px 2px #000;">TU NOMBRE REBELDE</h2>
+            <input type="text" id="nombre" placeholder="Ej: Piro" style="padding:15px; width:80%; border-radius:10px; border:none; text-align:center; font-size:18px;">
             <br><br>
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; width:80%; border:2px solid #f7e02e; border-radius:10px; font-weight:bold;">UNIRSE</button>
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; width:80%; border:2px solid #f7e02e; border-radius:10px; font-weight:bold; font-size:18px;">ENTRAR EN COMBATE</button>
         </div>
 
         <div id="espera" style="display:none; text-align:center;">
-            <h2 id="msg-status" style="color:#f7e02e;">¡EN POSICIÓN!</h2>
-            <p>Espera a la siguiente pregunta...</p>
+            <h2 id="msg-espera" style="color:#f7e02e; font-size: 30px;">¡EN POSICIÓN!</h2>
+            <p>Espera a que el Comandante lance la pregunta...</p>
         </div>
 
         <div id="botones" style="display:none; width:90%;">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div style="display:grid; grid-template-columns:1fr; gap:15px;">
                 <button onclick="enviar(0)" class="btn-op">A</button>
                 <button onclick="enviar(1)" class="btn-op">B</button>
                 <button onclick="enviar(2)" class="btn-op">C</button>
@@ -31,8 +31,8 @@
     </div>
 
     <style>
-        .btn-op { height:120px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:40px; border-radius:15px; }
-        .btn-op:active { background: #8b0000; }
+        .btn-op { height:90px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:35px; border-radius:15px; font-weight:bold; }
+        .btn-op:active { background: #8b0000; transform: scale(0.95); }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -67,15 +67,21 @@
                 db.ref('respuestasRecibidas/' + miId).set({ opIdx: i });
                 document.getElementById('botones').style.display = 'none';
                 document.getElementById('espera').style.display = 'block';
-                document.getElementById('msg-status').innerText = "¡ENVIADO!";
+                document.getElementById('msg-espera').innerText = "¡RESPUESTA ENVIADA!";
             }
         }
 
+        // Cambio de pantallas automático
         db.ref('estadoJuego').on('value', snap => {
             const data = snap.val();
             if(data && data.estado === 'jugando' && miId) {
                 document.getElementById('espera').style.display = 'none';
                 document.getElementById('botones').style.display = 'block';
+                document.getElementById('msg-espera').innerText = "¡EN POSICIÓN!";
+            } else if (data && data.estado === 'finalizado') {
+                document.getElementById('botones').style.display = 'none';
+                document.getElementById('espera').style.display = 'block';
+                document.getElementById('msg-espera').innerText = "FIN DE LA MISIÓN";
             }
         });
     </script>

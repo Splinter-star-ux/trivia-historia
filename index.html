@@ -2,92 +2,97 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Revolución bajo el sol del Caribe</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Multimillonario - Trivia Revolucionaria</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { background: #0a0a0a; margin: 0; overflow: hidden; color: white; }
-        .slide-container { width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-size: cover; background-position: center; }
-        .active { display: flex; }
-        .qr-area { background: white; padding: 20px; border-radius: 15px; margin: 20px; display: inline-block; }
-        .btn-mision { background: #8b0000; color: white; padding: 15px 50px; font-size: 24px; border: 3px solid #ffca28; cursor: pointer; font-weight: bold; }
-        #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; }
+        
+        /* Contenedores de Pantallas */
+        .pantalla { width: 100%; height: 100%; display: none; position: absolute; top: 0; left: 0; }
+        .activa { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        /* Pantalla de Espera (La que ves ahora) */
+        #pantalla-espera { 
+            background: url('TU_GIF_DE_ESPERA.gif') no-center center/cover; 
+        }
+
+        /* Contenedor del QR y Botones */
+        #info-conexion {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            border: 2px solid #ffd700;
+        }
+
+        #qrcode { background: white; padding: 10px; margin: 20px auto; display: inline-block; }
+
+        /* Botones Estilo Juego */
+        .btn-juego {
+            background: linear-gradient(#4e0000, #b30000);
+            color: gold;
+            padding: 15px 30px;
+            border: 2px solid gold;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
-    <div class="slide-container active" id="s0" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('fondo.jpg');">
-        <h1 style="font-size: 70px;">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
+    <div id="pantalla-espera" class="pantalla activa">
+        <div id="info-conexion">
+            <h1>TRIVIA MULTIMILLONARIA</h1>
+            <p>Escanea para entrar desde tu celular:</p>
+            <div id="qrcode"></div>
+            <br>
+            <button class="btn-juego" onclick="iniciarTrivia()">EMPEZAR JUEGO</button>
+        </div>
     </div>
 
-    <div class="slide-container" id="s1" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('fondo.jpg');">
-        <h2 style="color:#ffca28; font-size: 45px;">SALA DE MANDO</h2>
-        <div id="qrcode" class="qr-area"></div>
-        <p>Escanea para unirte a la columna rebelde</p>
-        <button id="btn-start" class="btn-mision">INICIAR OPERACIÓN</button>
-        <div id="players-list" style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
-        <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; background:none; border:1px solid #555; color:#555; cursor:pointer;">LIMPIAR INTERFAZ</button>
+    <div id="pantalla-juego" class="pantalla">
+        <img src="TU_IMAGEN_DE_JUEGO.png" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
-    <div id="game-overlay">
-        <div id="countdown" style="font-size: 200px; color: #ffca28;">3</div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
+        // 1. CONFIGURACIÓN FIREBASE (Copia tus datos aquí)
         const firebaseConfig = {
-            apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
-            authDomain: "historia-revoluc.firebaseapp.com",
-            databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
-            projectId: "historia-revoluc",
-            storageBucket: "historia-revoluc.firebasestorage.app",
-            messagingSenderId: "383656491875",
-            appId: "1:383656491875:web:d7111a270494cdcb58f156"
+            apiKey: "TU_API_KEY",
+            databaseURL: "TU_DATABASE_URL",
+            projectId: "TU_PROJECT_ID"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
 
-        // Forzar generación de QR
-        window.onload = () => {
-            const urlFinal = window.location.href.replace("index.html", "control.html");
-            new QRCode(document.getElementById("qrcode"), { text: urlFinal, width: 200, height: 200 });
-        };
+        // 2. GENERAR CÓDIGO QR
+        // Asegúrate de que el link sea el de tu página de control móvil
+        new QRCode(document.getElementById("qrcode"), {
+            text: "https://tu-página.web.app/control.html",
+            width: 200,
+            height: 200
+        });
 
-        // Botón Iniciar
-        document.getElementById('btn-start').onclick = () => {
-            document.getElementById('game-overlay').style.display = 'flex';
-            let c = 3;
-            const cd = document.getElementById('countdown');
-            const t = setInterval(() => {
-                c--;
-                if(c > 0) cd.innerText = c;
-                else {
-                    clearInterval(t);
-                    cd.innerText = "¡YA!";
-                    db.ref('estadoJuego').set({ estado: 'jugando' });
-                    setTimeout(() => { document.getElementById('game-overlay').style.display='none'; }, 1000);
-                }
-            }, 1000);
-        };
+        // 3. LÓGICA DE CAMBIO DE PANTALLA
+        function iniciarTrivia() {
+            document.getElementById('pantalla-espera').classList.remove('activa');
+            document.getElementById('pantalla-juego').classList.add('activa');
+            
+            // Avisamos a Firebase que el juego empezó
+            database.ref('estadoJuego').set({ activo: true });
+        }
 
-        // Navegación
-        let currentS = 0;
-        window.onkeydown = (e) => {
-            if(e.key === "ArrowRight") {
-                document.getElementById('s'+currentS).classList.remove('active');
-                currentS++;
-                document.getElementById('s'+currentS).classList.add('active');
+        // Escuchar si alguien más inicia el juego (desde el celular)
+        database.ref('estadoJuego').on('value', (snapshot) => {
+            if (snapshot.val() && snapshot.val().activo) {
+                document.getElementById('pantalla-espera').classList.remove('activa');
+                document.getElementById('pantalla-juego').classList.add('activa');
             }
-        };
-
-        // Lista de jugadores
-        db.ref('jugadores').on('value', snap => {
-            const list = document.getElementById('players-list');
-            list.innerHTML = "";
-            snap.forEach(c => {
-                list.innerHTML += `<span style="background:#8b0000; padding:5px 10px; border-radius:15px; border:1px solid #ffca28;">🚩 ${c.val().nombre}</span>`;
-            });
         });
     </script>
 </body>

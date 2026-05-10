@@ -2,38 +2,38 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Trivia Pro: Revolución Cubana</title>
+    <title>Trivia Épica: Revolución Cubana</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; background: #000 url('fondo.jpg') no-repeat center center fixed; background-size: cover; color: white; font-family: 'Urbanist', sans-serif; overflow: hidden; }
-        .overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 1; }
+        .overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.75); z-index: 1; }
         .content { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        .main-title { font-family: 'Playfair Display', serif; font-size: 50px; color: #f7e02e; text-transform: uppercase; margin: 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        .main-title { font-family: 'Playfair Display', serif; font-size: 50px; color: #f7e02e; text-transform: uppercase; margin: 0; text-shadow: 2px 2px 15px rgba(0,0,0,1); }
         
-        /* Animación "Preparados" */
-        #animacion-preparados { font-size: 50px; color: #f7e02e; display: none; animation: zoom 0.8s infinite alternate; font-family: 'Playfair Display'; }
-        @keyframes zoom { from { transform: scale(1); } to { transform: scale(1.1); } }
+        /* Animaciones de Suspenso */
+        #anim-preparados, #anim-ganador { font-size: 60px; color: #f7e02e; display: none; font-family: 'Playfair Display'; animation: glow 1s infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 10px #f7e02e; transform: scale(1); } to { text-shadow: 0 0 30px #ff0000; transform: scale(1.1); } }
 
-        /* Estilo del QR */
-        #qrcode { background: white; padding: 15px; border-radius: 10px; display: inline-block; margin: 20px; box-shadow: 0 0 20px rgba(247,224,46,0.3); }
-
-        /* Trivia y Opciones */
+        /* Estilos de Trivia */
         #game-area { display: none; width: 90%; }
-        .pregunta { font-size: 38px; color: #f7e02e; margin-bottom: 30px; font-family: 'Playfair Display'; }
+        .pregunta { font-size: 40px; color: #f7e02e; margin-bottom: 30px; font-family: 'Playfair Display'; }
         .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .opcion { background: rgba(139, 0, 0, 0.8); border: 2px solid #fff; padding: 20px; font-size: 24px; border-radius: 10px; }
+        .opcion { background: rgba(139, 0, 0, 0.85); border: 2px solid #fff; padding: 25px; font-size: 26px; border-radius: 12px; }
 
-        /* Toasts de Acierto */
-        #notificaciones { position: absolute; right: 20px; top: 20px; width: 280px; z-index: 100; }
-        .toast-acierto { background: #2e7d32; color: white; padding: 15px; margin-bottom: 10px; border-left: 5px solid #f7e02e; border-radius: 5px; animation: slideIn 0.4s ease-out; font-weight: bold; }
+        /* Notificaciones de puntos */
+        #notificaciones { position: absolute; right: 20px; top: 20px; width: 300px; z-index: 100; }
+        .toast { background: #2e7d32; color: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 8px solid #f7e02e; animation: slideIn 0.5s; font-weight: bold; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* Ranking */
-        #ranking-final { display: none; background: rgba(15,15,15,0.95); padding: 40px; border-radius: 20px; border: 3px solid #f7e02e; width: 60%; }
-        .rank-item { font-size: 30px; margin: 15px 0; border-bottom: 1px solid #444; padding: 10px; display: flex; justify-content: space-between; }
-        
-        .btn-host { background: #8B0000; color: white; padding: 15px 35px; border: 2px solid #f7e02e; cursor: pointer; font-weight: bold; margin-top: 20px; text-transform: uppercase; }
+        /* Ranking Final Vistoso */
+        #ranking-final { display: none; background: rgba(0,0,0,0.9); padding: 50px; border-radius: 30px; border: 4px solid #f7e02e; box-shadow: 0 0 50px rgba(247,224,46,0.5); width: 70%; }
+        .rank-item { font-size: 35px; margin: 15px 0; border-bottom: 2px solid rgba(255,255,255,0.1); padding: 15px; display: flex; justify-content: space-between; }
+        .first-place { color: #f7e02e; font-size: 45px; font-weight: bold; border-bottom: 3px solid #f7e02e; }
+
+        .btn-host { background: #8B0000; color: white; padding: 18px 40px; border: 2px solid #f7e02e; cursor: pointer; font-weight: bold; margin: 10px; text-transform: uppercase; font-size: 16px; transition: 0.3s; }
+        .btn-host:hover { background: #ff0000; box-shadow: 0 0 20px #f7e02e; }
+        .btn-reset { background: #333; border-color: #777; font-size: 12px; padding: 10px 20px; }
     </style>
 </head>
 <body>
@@ -43,13 +43,16 @@
     <div class="content">
         <div id="pantalla-inicio">
             <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
-            <div id="qrcode"></div>
-            <p style="letter-spacing: 2px;">ESCANEEN PARA UNIRSE A LA COLUMNA</p>
-            <div id="lista-conectados" style="color:#f7e02e; font-weight:bold; margin:15px;">0 Combatientes listos</div>
-            <button class="btn-host" id="btn-preparar">¡COMENZAR DESAFÍO!</button>
+            <div id="qrcode" style="background:white; padding:15px; border-radius:15px; display:inline-block; margin:25px;"></div>
+            <p style="font-weight: bold; letter-spacing: 3px;">ESCANEEN PARA UNIRSE A LA COLUMNA</p>
+            <div id="lista-conectados" style="color:#f7e02e; font-size: 20px; margin: 15px;">Esperando rebeldes...</div>
+            <button class="btn-host" id="btn-preparar">¡COMENZAR MISIÓN!</button>
+            <br>
+            <button class="btn-host btn-reset" onclick="reiniciarBaseDatos()">REINICIAR TODO EL SISTEMA</button>
         </div>
 
-        <div id="animacion-preparados">¿PREPARADOS PARA DESAFIAR SUS CONOCIMIENTOS?</div>
+        <div id="anim-preparados">¿PREPARADOS PARA DESAFIAR SUS CONOCIMIENTOS?</div>
+        <div id="anim-ganador">¿LISTOS PARA VER AL GANADOR?</div>
 
         <div id="game-area">
             <div class="pregunta" id="txt-pregunta"></div>
@@ -58,9 +61,9 @@
         </div>
 
         <div id="ranking-final">
-            <h1 style="color:#f7e02e; font-family:'Playfair Display'; font-size: 50px;">🏆 CUADRO DE HONOR 🏆</h1>
+            <h1 style="color:#f7e02e; font-family:'Playfair Display'; font-size: 55px; margin-bottom: 10px;">🏆 CUADRO DE HONOR 🏆</h1>
             <div id="lista-ganadores"></div>
-            <button class="btn-host" onclick="location.reload()">Reiniciar Misión</button>
+            <button class="btn-host" onclick="location.reload()">VOLVER AL INICIO</button>
         </div>
     </div>
 
@@ -81,7 +84,7 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        // GENERADOR DE QR MEJORADO (FUERZA CONTROL.HTML)
+        // Generar QR infalible
         const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
         const urlMando = window.location.origin + path + "control.html";
         new QRCode(document.getElementById("qrcode"), { text: urlMando, width: 180, height: 180 });
@@ -99,10 +102,19 @@
         let idx = 0;
         let jugadores = {};
 
-        // Sistema de Flujo
+        // Función Reiniciar Todo
+        function reiniciarBaseDatos() {
+            if(confirm("¿Estás seguro? Esto expulsará a todos y borrará los puntos.")) {
+                db.ref('/').remove().then(() => {
+                    alert("Sistema reseteado.");
+                    location.reload();
+                });
+            }
+        }
+
         document.getElementById('btn-preparar').onclick = () => {
             document.getElementById('pantalla-inicio').style.display = 'none';
-            const anim = document.getElementById('animacion-preparados');
+            const anim = document.getElementById('anim-preparados');
             anim.style.display = 'block';
             setTimeout(() => {
                 anim.style.display = 'none';
@@ -113,9 +125,8 @@
 
         function lanzarPregunta(n) {
             idx = n;
-            db.ref('estadoJuego').set({ estado: 'jugando', pIdx: n, timestamp: Date.now() });
+            db.ref('estadoJuego').set({ estado: 'jugando', pIdx: n });
             db.ref('respuestasRecibidas').remove();
-            
             document.getElementById('txt-pregunta').innerText = preguntas[n].p;
             const box = document.getElementById('opciones-box');
             box.innerHTML = "";
@@ -125,34 +136,48 @@
         }
 
         document.getElementById('btn-siguiente').onclick = () => {
-            if(idx < preguntas.length - 1) lanzarPregunta(idx + 1);
-            else finalizarJuego();
+            if(idx < preguntas.length - 1) {
+                lanzarPregunta(idx + 1);
+            } else {
+                // Secuencia Final
+                document.getElementById('game-area').style.display = 'none';
+                const animG = document.getElementById('anim-ganador');
+                animG.style.display = 'block';
+                setTimeout(() => {
+                    animG.style.display = 'none';
+                    mostrarRankingFinal();
+                }, 4000); // 4 segundos de suspenso
+            }
         };
 
-        // Escuchar respuestas y mostrar Toasts
         db.ref('respuestasRecibidas').on('child_added', snap => {
             const r = snap.val();
             const p = jugadores[snap.key];
             if(p && parseInt(r.opIdx) === preguntas[idx].c) {
                 db.ref('jugadores/' + snap.key + '/puntos').transaction(pts => (pts || 0) + 10);
-                
                 const toast = document.createElement('div');
-                toast.className = 'toast-acierto';
-                toast.innerHTML = `⭐ ${p.nombre} ACERTÓ! <br> <small>Puntos totales: ${(p.puntos || 0) + 10}</small>`;
+                toast.className = 'toast';
+                toast.innerHTML = `🚩 ${p.nombre} ACERTÓ (+10)`;
                 document.getElementById('notificaciones').appendChild(toast);
                 setTimeout(() => toast.remove(), 2500);
             }
         });
 
-        db.ref('jugadores').on('value', s => { jugadores = s.val() || {}; document.getElementById('lista-conectados').innerText = s.numChildren() + " Combatientes listos"; });
+        db.ref('jugadores').on('value', s => { 
+            jugadores = s.val() || {}; 
+            document.getElementById('lista-conectados').innerText = s.numChildren() + " Combatientes en línea";
+        });
 
-        function finalizarJuego() {
-            document.getElementById('game-area').style.display = 'none';
+        function mostrarRankingFinal() {
             db.ref('estadoJuego').set({ estado: 'finalizado' });
-            const rf = document.getElementById('ranking-final');
-            rf.style.display = 'block';
+            document.getElementById('ranking-final').style.display = 'block';
             const sorted = Object.values(jugadores).sort((a,b) => b.puntos - a.puntos);
-            document.getElementById('lista-ganadores').innerHTML = sorted.map((p, i) => `<div class="rank-item"><span>${i+1}. ${p.nombre}</span> <b>${p.puntos || 0} PTS</b></div>`).join('');
+            document.getElementById('lista-ganadores').innerHTML = sorted.map((p, i) => `
+                <div class="rank-item ${i === 0 ? 'first-place' : ''}">
+                    <span>${i === 0 ? '🥇' : i+1 + '.'} ${p.nombre}</span>
+                    <b>${p.puntos || 0} PTS</b>
+                </div>
+            `).join('');
         }
     </script>
 </body>

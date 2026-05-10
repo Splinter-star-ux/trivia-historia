@@ -10,15 +10,15 @@
     <div id="bg-layer" class="espera-bg"></div>
     <div class="overlay">
         <div id="registro">
-            <h2 style="color:#f7e02e; text-shadow: 2px 2px #000;">TU NOMBRE REBELDE</h2>
-            <input type="text" id="nombre" placeholder="Ej: Piro" style="padding:15px; width:80%; border-radius:10px; border:none; text-align:center; font-size:18px;">
+            <h2 style="color:#f7e02e;">IDENTIFÍCATE</h2>
+            <input type="text" id="nombre" placeholder="Tu nombre..." style="padding:15px; width:80%; border-radius:10px; border:none; text-align:center; font-size:18px;">
             <br><br>
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; width:80%; border:2px solid #f7e02e; border-radius:10px; font-weight:bold; font-size:18px;">ENTRAR EN COMBATE</button>
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; width:80%; border:2px solid #f7e02e; border-radius:10px; font-weight:bold;">UNIRSE A LA COLUMNA</button>
         </div>
 
-        <div id="espera" style="display:none; text-align:center;">
-            <h2 id="msg-espera" style="color:#f7e02e; font-size: 30px;">¡EN POSICIÓN!</h2>
-            <p>Espera a que el Comandante lance la pregunta...</p>
+        <div id="espera" style="display:none; text-align:center; padding: 20px;">
+            <h2 id="msg-status" style="color:#f7e02e; font-size: 30px;">¡EN POSICIÓN!</h2>
+            <p id="msg-sub">Espera las órdenes del Comandante...</p>
         </div>
 
         <div id="botones" style="display:none; width:90%;">
@@ -31,7 +31,7 @@
     </div>
 
     <style>
-        .btn-op { height:90px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:35px; border-radius:15px; font-weight:bold; }
+        .btn-op { height:90px; background:rgba(255,255,255,0.15); color:white; border:2px solid white; font-size:40px; border-radius:15px; font-weight:bold; }
         .btn-op:active { background: #8b0000; transform: scale(0.95); }
     </style>
 
@@ -67,23 +67,26 @@
                 db.ref('respuestasRecibidas/' + miId).set({ opIdx: i });
                 document.getElementById('botones').style.display = 'none';
                 document.getElementById('espera').style.display = 'block';
-                document.getElementById('msg-espera').innerText = "¡RESPUESTA ENVIADA!";
+                document.getElementById('msg-status').innerText = "¡RECIBIDO!";
             }
         }
 
-        // Cambio de pantallas automático
         db.ref('estadoJuego').on('value', snap => {
             const data = snap.val();
             if(data && data.estado === 'jugando' && miId) {
                 document.getElementById('espera').style.display = 'none';
                 document.getElementById('botones').style.display = 'block';
-                document.getElementById('msg-espera').innerText = "¡EN POSICIÓN!";
+                document.getElementById('msg-status').innerText = "¡EN POSICIÓN!";
             } else if (data && data.estado === 'finalizado') {
                 document.getElementById('botones').style.display = 'none';
                 document.getElementById('espera').style.display = 'block';
-                document.getElementById('msg-espera').innerText = "FIN DE LA MISIÓN";
+                document.getElementById('msg-status').innerText = "¡FIN DEL COMBATE!";
+                document.getElementById('msg-sub').innerText = "Mira la pantalla para ver el podio.";
             }
         });
+
+        // Si el host reinicia todo, recargamos el celular
+        db.ref('jugadores').on('value', s => { if(!s.exists()) location.reload(); });
     </script>
 </body>
 </html>

@@ -10,23 +10,23 @@
     <div id="bg-layer" class="espera-bg"></div>
 
     <div class="overlay">
-        <div id="pantalla-registro">
-            <h2 style="color:#ffca28;">NOMBRE DEL REBELDE</h2>
+        <div id="registro">
+            <h2 style="color:#f7e02e;">NOMBRE DEL REBELDE</h2>
             <input type="text" id="nombre" style="padding:15px; width:70%; border-radius:10px; border:none; margin-bottom:20px; text-align:center;">
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #ffca28; font-weight:bold; border-radius:10px;">UNIRSE</button>
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #f7e02e; font-weight:bold; border-radius:10px;">UNIRSE</button>
         </div>
 
-        <div id="pantalla-espera" style="display:none; text-align:center;">
-            <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
+        <div id="espera" style="display:none; text-align:center;">
+            <h2 style="color:#f7e02e;">¡EN POSICIÓN!</h2>
             <p>Espera órdenes de la base...</p>
         </div>
 
-        <div id="pantalla-juego" style="display:none; width:90%;">
+        <div id="juego" style="display:none; width:90%;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                <button onclick="enviar('A')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">A</button>
-                <button onclick="enviar('B')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">B</button>
-                <button onclick="enviar('C')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">C</button>
-                <button onclick="enviar('D')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">D</button>
+                <button onclick="enviar('A')" style="height:100px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:30px;">A</button>
+                <button onclick="enviar('B')" style="height:100px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:30px;">B</button>
+                <button onclick="enviar('C')" style="height:100px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:30px;">C</button>
+                <button onclick="enviar('D')" style="height:100px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:30px;">D</button>
             </div>
         </div>
     </div>
@@ -53,14 +53,12 @@
                 const j = db.ref('jugadores').push();
                 miId = j.key;
                 j.set({ nombre: n, puntos: 0 });
-                document.getElementById('pantalla-registro').style.display = 'none';
-                document.getElementById('pantalla-espera').style.display = 'block';
+                document.getElementById('registro').style.display = 'none';
+                document.getElementById('espera').style.display = 'block';
             }
         };
 
-        window.enviar = (op) => {
-            if(miId) db.ref('respuestasRecibidas/' + miId).set({ opcion: op });
-        };
+        window.enviar = (op) => { if(miId) db.ref('respuestasRecibidas/' + miId).set({ opcion: op }); };
 
         db.ref('estadoJuego').on('value', snap => {
             const e = snap.val() ? snap.val().estado : 'espera';
@@ -68,12 +66,12 @@
             if(bg && miId) {
                 if(e === 'jugando') {
                     bg.className = 'juego-bg';
-                    document.getElementById('pantalla-espera').style.display = 'none';
-                    document.getElementById('pantalla-juego').style.display = 'block';
+                    document.getElementById('espera').style.display = 'none';
+                    document.getElementById('juego').style.display = 'block';
                 } else {
                     bg.className = 'espera-bg';
-                    document.getElementById('pantalla-espera').style.display = 'block';
-                    document.getElementById('pantalla-juego').style.display = 'none';
+                    document.getElementById('espera').style.display = 'block';
+                    document.getElementById('juego').style.display = 'none';
                 }
             }
         });

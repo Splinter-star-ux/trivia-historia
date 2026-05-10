@@ -2,59 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Revolución Cubana - Expo</title>
+    <title>Trivia: Revolución Cubana</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { background: #0a0a0a; margin: 0; overflow: hidden; color: white; font-family: 'Urbanist', sans-serif; }
-        .slide-container { width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-size: cover; background-position: center; }
-        .active { display: flex; }
-        .main-title { font-family: 'Playfair Display'; font-size: 70px; color: #ffca28; text-transform: uppercase; margin: 0; text-shadow: 3px 3px 10px rgba(0,0,0,0.8); }
+        body { margin: 0; padding: 0; background: #000 url('fondo.jpg') no-repeat center center fixed; background-size: cover; color: white; font-family: 'Urbanist', sans-serif; overflow: hidden; }
+        .overlay-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1; }
+        .content { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        /* Contenedor del QR */
-        .qr-area { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 10px; 
-            margin: 20px auto; 
-            display: block; 
-            width: 200px; 
-            height: 200px; 
-        }
+        .main-title { font-family: 'Playfair Display', serif; font-size: 60px; color: #f7e02e; text-transform: uppercase; margin: 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        .qr-section { background: rgba(26, 26, 26, 0.9); padding: 30px; border-radius: 15px; border: 2px solid #8B0000; margin-top: 20px; }
+        .qr-box { background: white; padding: 10px; border-radius: 10px; display: inline-block; }
         
-        .btn-mision { background: #8b0000; color: white; padding: 15px 50px; font-size: 24px; border: 3px solid #ffca28; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
-        #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-        #countdown { font-size: 200px; color: #ffca28; font-family: 'Playfair Display'; }
+        .btn-mision { background: #8B0000; color: white; padding: 15px 40px; font-size: 20px; border: 2px solid #f7e02e; cursor: pointer; font-weight: bold; border-radius: 5px; margin-top: 20px; }
+        .btn-mision:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(247,224,46,0.4); }
+        
+        #game-area { display: none; width: 80%; }
+        .pregunta { font-size: 35px; color: #f7e02e; margin-bottom: 30px; font-family: 'Playfair Display'; }
+        .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+        .opcion { background: rgba(139, 0, 0, 0.8); border: 2px solid #fff; padding: 20px; font-size: 24px; border-radius: 10px; }
     </style>
 </head>
 <body>
+    <div class="overlay-bg"></div>
 
-    <div class="slide-container active" id="s0" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('fondo.jpg');">
-        <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
-        <p>EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
-        <p style="font-size: 14px; margin-top: 20px; color: #888;">(Presiona flecha derecha para ir al QR)</p>
+    <div class="content">
+        <div id="inicio">
+            <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
+            <div class="qr-section">
+                <div id="qrcode" class="qr-box"></div>
+                <p>Escanea para unirte a la columna rebelde</p>
+                <button class="btn-mision" id="btn-start">INICIAR OPERACIÓN</button>
+            </div>
+            <p id="counter" style="margin-top:15px; color:#f7e02e;">Esperando combatientes...</p>
+        </div>
+
+        <div id="game-area">
+            <div id="countdown" style="font-size: 100px; color: #f7e02e;"></div>
+            <div id="trivia-content" style="display:none;">
+                <div class="pregunta" id="texto-pregunta"></div>
+                <div class="opciones" id="lista-opciones"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="slide-container" id="s1" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('fondo.jpg');">
-        <h2 style="color:#ffca28; font-size: 45px; font-family: 'Playfair Display';">SALA DE MANDO</h2>
-        
-        <div id="qrcode" class="qr-area"></div>
-        
-        <p>Escanea para unirte a la columna rebelde</p>
-        <button id="btn-start" class="btn-mision">INICIAR OPERACIÓN</button>
-        
-        <div id="players-list" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;"></div>
-    </div>
-
-    <div id="game-overlay">
-        <div id="countdown">3</div>
-    </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",
@@ -67,26 +62,54 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // FUNCIÓN PARA GENERAR EL QR (FORZADA)
-        function generarQR() {
-            const container = document.getElementById("qrcode");
-            container.innerHTML = ""; // Limpiar si había algo
-            
-            // Creamos la URL para el celular (control.html)
-            const urlBase = window.location.href.split('index.html')[0];
-            const urlFinal = urlBase + "control.html";
-            
-            console.log("Generando QR para: ", urlFinal);
-            
-            new QRCode(container, {
-                text: urlFinal,
-                width: 200,
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
+        // Generar QR
+        const urlFinal = window.location.href.replace("index.html", "control.html");
+        new QRCode(document.getElementById("qrcode"), { text: urlFinal, width: 180, height: 180 });
+
+        // Preguntas
+        const preguntas = [
+            { p: "¿Quién lideró el asalto al Cuartel Moncada?", o: ["Fulgencio Batista", "Fidel Castro", "Che Guevara", "Camilo Cienfuegos"], c: 1 },
+            { p: "¿En qué año triunfó la Revolución?", o: ["1953", "1959", "1961", "1952"], c: 1 },
+            { p: "¿Cuál era el nombre del yate que transportó a los rebeldes?", o: ["Santa María", "Granma", "Victory", "Piraña"], c: 1 }
+        ];
+
+        // Lógica de Inicio
+        document.getElementById('btn-start').onclick = () => {
+            document.getElementById('inicio').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            db.ref('estadoJuego').set({ estado: 'jugando' });
+            lanzarTrivia();
+        };
+
+        function lanzarTrivia() {
+            let count = 3;
+            const cd = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                cd.innerText = count;
+                if(count === 0) {
+                    clearInterval(timer);
+                    cd.style.display = 'none';
+                    document.getElementById('trivia-content').style.display = 'block';
+                    mostrarPregunta(0);
+                }
+                count--;
+            }, 1000);
+        }
+
+        function mostrarPregunta(index) {
+            const current = preguntas[index];
+            document.getElementById('texto-pregunta').innerText = current.p;
+            const lista = document.getElementById('lista-opciones');
+            lista.innerHTML = "";
+            current.o.forEach((opt, i) => {
+                lista.innerHTML += `<div class="opcion">${String.fromCharCode(65+i)}) ${opt}</div>`;
             });
         }
 
-        // Ejecutar al cargar la página
-        window.onload =
+        // Contador de jugadores
+        db.ref('jugadores').on('value', s => {
+            document.getElementById('counter').innerText = s.numChildren() + " Combatientes en línea";
+        });
+    </script>
+</body>
+</html>

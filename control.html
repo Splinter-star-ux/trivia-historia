@@ -9,32 +9,30 @@
 <body>
     <div id="bg-layer" class="espera-bg"></div>
     <div class="overlay">
-        <div id="seccion-registro">
-            <h2 style="color:#f7e02e;">TU NOMBRE, COMBATIENTE</h2>
-            <input type="text" id="input-nombre" style="padding:15px; width:80%; border-radius:10px; border:none; text-align:center; font-size:18px;">
+        <div id="registro">
+            <h2 style="color:#f7e02e;">TU NOMBRE</h2>
+            <input type="text" id="nombre" style="padding:15px; width:80%; border-radius:10px; border:none; text-align:center;">
             <br><br>
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #f7e02e; font-weight:bold; border-radius:10px; width:80%;">UNIRSE A LA COLUMNA</button>
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px; width:80%; border:2px solid #f7e02e; border-radius:10px; font-weight:bold;">UNIRSE</button>
         </div>
 
-        <div id="seccion-espera" style="display:none; text-align:center;">
-            <h2 id="msg-espera" style="color:#f7e02e;">¡LISTO!</h2>
-            <p>Espera a que el Comandante inicie la misión...</p>
+        <div id="espera" style="display:none; text-align:center;">
+            <h2 id="msg-status" style="color:#f7e02e;">¡EN POSICIÓN!</h2>
+            <p>Espera a la siguiente pregunta...</p>
         </div>
 
-        <div id="seccion-botones" style="display:none; width:90%;">
-            <h3 style="color:#f7e02e; text-align:center;">ELIGE TU RESPUESTA:</h3>
+        <div id="botones" style="display:none; width:90%;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                <button onclick="responder(0)" class="btn-op">A</button>
-                <button onclick="responder(1)" class="btn-op">B</button>
-                <button onclick="responder(2)" class="btn-op">C</button>
-                <button onclick="responder(3)" class="btn-op">D</button>
+                <button onclick="enviar(0)" class="btn-op">A</button>
+                <button onclick="enviar(1)" class="btn-op">B</button>
+                <button onclick="enviar(2)" class="btn-op">C</button>
             </div>
         </div>
     </div>
 
     <style>
-        .btn-op { height:120px; background:rgba(255,255,255,0.15); color:white; border:2px solid white; font-size:40px; font-weight:bold; border-radius:10px; }
-        .btn-op:active { background:#8b0000; }
+        .btn-op { height:120px; background:rgba(255,255,255,0.1); color:white; border:2px solid white; font-size:40px; border-radius:15px; }
+        .btn-op:active { background: #8b0000; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -51,34 +49,33 @@
         };
         firebase.initializeApp(config);
         const db = firebase.database();
-        let miId = localStorage.getItem('rebeldeId') || "";
+        let miId = "";
 
         document.getElementById('btn-unirse').onclick = () => {
-            const nom = document.getElementById('input-nombre').value.trim();
-            if(nom) {
+            const n = document.getElementById('nombre').value.trim();
+            if(n) {
                 const ref = db.ref('jugadores').push();
                 miId = ref.key;
-                localStorage.setItem('rebeldeId', miId);
-                ref.set({ nombre: nom, puntos: 0 });
-                document.getElementById('seccion-registro').style.display = 'none';
-                document.getElementById('seccion-espera').style.display = 'block';
+                ref.set({ nombre: n, puntos: 0 });
+                document.getElementById('registro').style.display = 'none';
+                document.getElementById('espera').style.display = 'block';
             }
         };
 
-        function responder(idx) {
+        function enviar(i) {
             if(miId) {
-                db.ref('respuestasRecibidas/' + miId).set({ opcionIdx: idx });
-                document.getElementById('seccion-botones').style.display = 'none';
-                document.getElementById('seccion-espera').style.display = 'block';
-                document.getElementById('msg-espera').innerText = "¡ENVIADO!";
+                db.ref('respuestasRecibidas/' + miId).set({ opIdx: i });
+                document.getElementById('botones').style.display = 'none';
+                document.getElementById('espera').style.display = 'block';
+                document.getElementById('msg-status').innerText = "¡ENVIADO!";
             }
         }
 
         db.ref('estadoJuego').on('value', snap => {
             const data = snap.val();
             if(data && data.estado === 'jugando' && miId) {
-                document.getElementById('seccion-espera').style.display = 'none';
-                document.getElementById('seccion-botones').style.display = 'block';
+                document.getElementById('espera').style.display = 'none';
+                document.getElementById('botones').style.display = 'block';
             }
         });
     </script>

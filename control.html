@@ -5,79 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mando Rebelde</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body { background: #2b3020; color: white; text-align: center; padding: 20px; font-family: sans-serif; }
-        input { padding: 15px; width: 85%; margin: 20px 0; border: none; border-radius: 5px; font-size: 1.1rem; }
-        button { background: #8b0000; color: white; padding: 15px; border: 2px solid #ffca28; width: 90%; font-weight: bold; cursor: pointer; }
-        .opcion { background: #3e4431; margin: 10px 0; border: 1px solid #ffca28; font-size: 1.2rem; }
-    </style>
 </head>
 <body>
-    <div id="mando-box">
-        <div id="pantalla-registro">
-            <h2 style="color:#ffca28;">UNIRSE A LA COLUMNA</h2>
-            <input type="text" id="nombre" placeholder="Tu nombre">
-            <button id="btn-unirse">ENTRAR EN COMBATE</button>
+    <div id="bg-layer" class="espera-bg"></div>
+
+    <div class="overlay">
+        <div id="registro">
+            <h2 style="color:#ffca28;">NOMBRE DEL REBELDE</h2>
+            <input type="text" id="nombre" style="padding:15px; width:80%; border-radius:10px; border:none; margin-bottom:20px;">
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #ffca28; border-radius:10px;">UNIRSE</button>
         </div>
 
-        <div id="pantalla-espera" style="display:none;">
+        <div id="espera" style="display:none;">
             <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
-            <p>Espera a que el Comandante inicie la operación.</p>
-            <div style="font-size: 4rem; margin-top: 20px;">⭐</div>
+            <p>Espera a que inicie la operación...</p>
         </div>
 
-        <div id="pantalla-juego" style="display:none;">
-            <h2 style="color:#ffca28;">¡FUEGO!</h2>
-            <button class="opcion" onclick="alert('Opción A enviada')">A</button>
-            <button class="opcion" onclick="alert('Opción B enviada')">B</button>
-            <button class="opcion" onclick="alert('Opción C enviada')">C</button>
+        <div id="juego" style="display:none;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:90%;">
+                <button onclick="enviar('A')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">A</button>
+                <button onclick="enviar('B')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">B</button>
+                <button onclick="enviar('C')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">C</button>
+                <button onclick="enviar('D')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">D</button>
+            </div>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
-            authDomain: "historia-revoluc.firebaseapp.com",
-            databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
-            projectId: "historia-revoluc",
-            storageBucket: "historia-revoluc.firebasestorage.app",
-            messagingSenderId: "383656491875",
-            appId: "1:383656491875:web:d7111a270494cdcb58f156"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let yaRegistrado = false;
-
-        document.getElementById('btn-unirse').onclick = () => {
-            const nom = document.getElementById('nombre').value.trim();
-            if(nom) {
-                db.ref('jugadores').push({ nombre: nom });
-                document.getElementById('pantalla-registro').style.display = 'none';
-                document.getElementById('pantalla-espera').style.display = 'block';
-                yaRegistrado = true;
-            }
-        };
-
-        // Escuchar el estado del juego para cambiar de pantalla
-        db.ref('estadoJuego').on('value', (snap) => {
-            const data = snap.val();
-            if (yaRegistrado && data) {
-                const pEspera = document.getElementById('pantalla-espera');
-                const pJuego = document.getElementById('pantalla-juego');
-                
-                if (data.estado === 'jugando') {
-                    pEspera.style.display = 'none';
-                    pJuego.style.display = 'block';
-                } else {
-                    pEspera.style.display = 'block';
-                    pJuego.style.display = 'none';
-                }
-            }
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>

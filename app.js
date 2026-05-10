@@ -1,21 +1,31 @@
 const jugadoresRef = database.ref('jugadores');
 const juegoRef = database.ref('estadoJuego');
 
-// Resetear estado al abrir la página
+// Reiniciar estado de juego al cargar la página en PC
 juegoRef.set({ estado: 'espera' });
 
 const generarQR = () => {
     const qrDiv = document.getElementById("qrcode");
     if (qrDiv) {
-        qrDiv.innerHTML = ""; 
+        qrDiv.innerHTML = ""; // Limpiar antes de generar
+        
         let urlBase = window.location.href.split('index.html')[0];
         if (!urlBase.endsWith('/')) urlBase += '/';
         const urlMando = urlBase + 'control.html';
-        new QRCode(qrDiv, { text: urlMando, width: 180, height: 180 });
+
+        new QRCode(qrDiv, {
+            text: urlMando,
+            width: 180,
+            height: 180,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        console.log("QR listo para: " + urlMando);
     }
 };
 
-// Actualizar lista de jugadores en tiempo real
+// Escuchar y mostrar jugadores
 jugadoresRef.on('value', (snapshot) => {
     const lista = document.getElementById('lista-jugadores');
     if (lista) {
@@ -28,7 +38,7 @@ jugadoresRef.on('value', (snapshot) => {
     }
 });
 
-// Lógica del botón INICIAR
+// Acción de iniciar operación
 const btnIniciar = document.getElementById('btn-iniciar');
 if(btnIniciar) {
     btnIniciar.onclick = () => {
@@ -40,16 +50,18 @@ if(btnIniciar) {
     };
 }
 
-// Lógica del botón REINICIAR (El que limpia todo)
+// Acción de reiniciar (Limpiar base de datos)
 document.getElementById('btn-reiniciar').onclick = () => {
-    if(confirm("¿Quieres borrar los jugadores y reiniciar la sala?")) {
-        // 1. Borramos jugadores
+    if(confirm("¿Quieres borrar a todos los reclutas y reiniciar la sala?")) {
         jugadoresRef.remove();
-        // 2. Volvemos el juego a espera
         juegoRef.set({ estado: 'espera' });
-        // 3. Recargamos la página para que el QR y todo se limpie
         setTimeout(() => { location.reload(); }, 500);
     }
 };
 
-window.onload = generarQR;
+// Asegurar que el QR se genere al cargar
+window.onload = () => {
+    generarQR();
+    // Reintento de seguridad un segundo después
+    setTimeout(generarQR, 1000);
+};

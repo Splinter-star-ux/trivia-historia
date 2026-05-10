@@ -22,15 +22,15 @@
 
         <div id="pantalla-espera" style="display:none;">
             <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
-            <p>Espera a que el Comandante inicie la operación desde la PC.</p>
+            <p>Espera a que el Comandante inicie la operación.</p>
             <div style="font-size: 4rem; margin-top: 20px;">⭐</div>
         </div>
 
         <div id="pantalla-juego" style="display:none;">
             <h2 style="color:#ffca28;">¡FUEGO!</h2>
-            <button class="opcion" onclick="alert('Ataque A enviado')">OPCIÓN A</button>
-            <button class="opcion" onclick="alert('Ataque B enviado')">OPCIÓN B</button>
-            <button class="opcion" onclick="alert('Ataque C enviado')">OPCIÓN C</button>
+            <button class="opcion" onclick="alert('Opción A enviada')">A</button>
+            <button class="opcion" onclick="alert('Opción B enviada')">B</button>
+            <button class="opcion" onclick="alert('Opción C enviada')">C</button>
         </div>
     </div>
 
@@ -62,7 +62,7 @@
             }
         };
 
-        // Escuchar el estado global del juego
+        // Escuchar el estado del juego para cambiar de pantalla
         db.ref('estadoJuego').on('value', (snap) => {
             const data = snap.val();
             if (yaRegistrado && data) {

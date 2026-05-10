@@ -1,4 +1,3 @@
-// CONFIGURACIÓN FIREBASE (Usa la tuya)
 const firebaseConfig = {
     apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
     authDomain: "historia-revoluc.firebaseapp.com",
@@ -11,15 +10,74 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let miId = "";
+// --- 1. GENERACIÓN DEL QR ---
+const qrContainer = document.getElementById("qrcode");
+if (qrContainer) {
+    const urlMando = window.location.href.replace("index.html", "control.html");
+    new QRCode(qrContainer, {
+        text: urlMando,
+        width: 200,
+        height: 200
+    });
+}
 
-// --- LÓGICA PARA EL CONTROL (CELULAR) ---
-if (document.getElementById('btn-unirse')) {
-    document.getElementById('btn-unirse').onclick = () => {
-        const nom = document.getElementById('nombre').value;
+// --- 2. BOTONES DE CONTROL (PC) ---
+const btnStart = document.getElementById('btn-start');
+const btnReset = document.getElementById('btn-reset');
+
+if (btnStart) {
+    btnStart.onclick = () => {
+        document.getElementById('game-overlay').style.display = 'flex';
+        let c = 3;
+        const cd = document.getElementById('countdown');
+        const t = setInterval(() => {
+            c--;
+            if(c > 0) cd.innerText = c;
+            else {
+                clearInterval(t);
+                cd.innerText = "¡YA!";
+                setTimeout(() => {
+                    cd.style.display = 'none';
+                    db.ref('estadoJuego').set({ estado: 'jugando' });
+                }, 800);
+            }
+        }, 1000);
+    };
+}
+
+if (btnReset) {
+    btnReset.onclick = () => {
+        if(confirm("¿Reiniciar toda la partida y borrar jugadores?")) {
+            db.ref('jugadores').remove();
+            db.ref('estadoJuego').set({ estado: 'espera' });
+            db.ref('respuestasRecibidas').remove();
+            location.reload();
+        }
+    };
+}
+
+// --- 3. LISTA DE JUGADORES (PC) ---
+const pList = document.getElementById('players-list');
+if (pList) {
+    db.ref('jugadores').on('value', snap => {
+        pList.innerHTML = "";
+        snap.forEach(child => {
+            pList.innerHTML += `<span style="background:#8b0000; padding:5px 10px; border-radius:15px; border:1px solid #ffca28; font-size:14px;">🚩 ${child.val().nombre}</span>`;
+        });
+    });
+}
+
+// --- 4. LÓGICA PARA EL CELULAR (CONTROL) ---
+const btnUnirse = document.getElementById('btn-unirse');
+let miId = localStorage.getItem('miIdRevolucion') || "";
+
+if (btnUnirse) {
+    btnUnirse.onclick = () => {
+        const nom = document.getElementById('nombre').value.trim();
         if(nom) {
             const nuevo = db.ref('jugadores').push();
             miId = nuevo.key;
+            localStorage.setItem('miIdRevolucion', miId);
             nuevo.set({ nombre: nom, puntos: 0 });
             document.getElementById('registro').style.display = 'none';
             document.getElementById('espera').style.display = 'block';
@@ -27,18 +85,14 @@ if (document.getElementById('btn-unirse')) {
     };
 }
 
-function enviar(letra) {
-    if(miId) db.ref('respuestasRecibidas/' + miId).set({ opcion: letra });
-}
-
-// CAMBIO DE FONDO DINÁMICO EN EL CELULAR
+// CAMBIO DE FONDO Y PANTALLAS EN CELULAR
 db.ref('estadoJuego').on('value', snap => {
     const estado = snap.val() ? snap.val().estado : 'espera';
     const bg = document.getElementById('bg-layer');
     const pEspera = document.getElementById('espera');
     const pJuego = document.getElementById('juego');
 
-    if(bg) { // Solo si estamos en el control
+    if(bg) { 
         if(estado === 'jugando') {
             bg.className = 'juego-bg';
             if(pEspera) pEspera.style.display = 'none';
@@ -51,44 +105,33 @@ db.ref('estadoJuego').on('value', snap => {
     }
 });
 
-// --- LÓGICA PARA EL HOST (PC) ---
-if (document.getElementById('btn-start')) {
-    // Generar QR al cargar
-    new QRCode(document.getElementById("qrcode"), { text: window.location.href.replace("index.html", "control.html"), width: 200, height: 200 });
+// FUNCIÓN PARA ENVIAR RESPUESTA
+window.enviar = function(letra) {
+    if(miId) {
+        db.ref('respuestasRecibidas/' + miId).set({ opcion: letra });
+        alert("Respuesta " + letra + " enviada a la base.");
+    }
+};
 
-    // Cambiar diapositivas con flechas
-    let currentS = 0;
-    window.onkeydown = (e) => {
-        if(e.key === "ArrowRight") { 
-            document.getElementById('s'+currentS).classList.remove('active');
+// --- 5. PASAR DIAPOSITIVAS (PC) ---
+let currentS = 0;
+window.onkeydown = (e) => {
+    if(e.key === "ArrowRight") { 
+        const actual = document.getElementById('s'+currentS);
+        const siguiente = document.getElementById('s'+(currentS+1));
+        if(siguiente) {
+            actual.classList.remove('active');
             currentS++;
-            document.getElementById('s'+currentS).classList.add('active');
+            siguiente.classList.add('active');
         }
-    };
-
-    // Iniciar Trivia
-    document.getElementById('btn-start').onclick = () => {
-        document.getElementById('game-overlay').style.display = 'flex';
-        iniciarPregunta();
-    };
-}
-
-function iniciarPregunta() {
-    let count = 3;
-    const cd = document.getElementById('countdown');
-    cd.innerText = count;
-    const timer = setInterval(() => {
-        count--;
-        if(count > 0) cd.innerText = count;
-        else {
-            clearInterval(timer);
-            cd.innerText = "¡YA!";
-            setTimeout(() => {
-                cd.style.display = 'none';
-                document.getElementById('question-area').style.display = 'block';
-                db.ref('estadoJuego').set({ estado: 'jugando' });
-                // Aquí podrías poner el resto de tu lógica de tiempo...
-            }, 1000);
+    }
+    if(e.key === "ArrowLeft") {
+        const actual = document.getElementById('s'+currentS);
+        const anterior = document.getElementById('s'+(currentS-1));
+        if(anterior) {
+            actual.classList.remove('active');
+            currentS--;
+            anterior.classList.add('active');
         }
-    }, 1000);
-}
+    }
+};

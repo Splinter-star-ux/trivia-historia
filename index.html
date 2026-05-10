@@ -6,13 +6,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        body { background: #0a0a0a; overflow: hidden; }
+        body { background: #0a0a0a; margin: 0; overflow: hidden; }
         .slide-container { width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-size: cover; background-position: center; }
         .active { display: flex; }
         .main-title { font-family: 'Playfair Display'; font-size: 80px; color: #ffca28; text-transform: uppercase; margin: 0; }
-        .sub-title { font-size: 24px; letter-spacing: 2px; margin-top: 10px; }
-        .qr-area { background: white; padding: 20px; border-radius: 15px; margin: 30px; box-shadow: 0 0 20px rgba(255,202,40,0.3); }
-        .btn-mision { background: #8b0000; color: white; padding: 20px 60px; font-size: 28px; border: 3px solid #ffca28; cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 5px; }
+        .qr-area { background: white; padding: 20px; border-radius: 15px; margin: 20px; min-width: 200px; min-height: 200px; display: flex; justify-content: center; align-items: center; }
+        
+        .btn-mision { background: #8b0000; color: white; padding: 15px 50px; font-size: 24px; border: 3px solid #ffca28; cursor: pointer; font-weight: bold; text-transform: uppercase; margin: 10px; }
+        .btn-limpiar { background: #444; color: white; padding: 10px 20px; font-size: 14px; border: 1px solid #999; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+        
         #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
     </style>
 </head>
@@ -20,28 +22,29 @@
 
     <div class="slide-container active" id="s0" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('fondo.jpg');">
         <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
-        <p class="sub-title">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
+        <p>EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
     </div>
 
     <div class="slide-container" id="s1" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('fondo.jpg');">
-        <h2 style="color:#ffca28; font-size: 50px; font-family: 'Playfair Display';">SALA DE MANDO</h2>
-        <div id="qrcode" class="qr-area"></div>
-        <p style="font-size: 20px; margin-bottom: 20px;">Escanea para unirte a la columna rebelde</p>
+        <h2 style="color:#ffca28; font-size: 40px; font-family: 'Playfair Display';">SALA DE MANDO</h2>
+        
+        <div id="qrcode" class="qr-area"></div> <p style="margin-bottom: 20px;">Escanea para unirte a la columna rebelde</p>
+        
         <button id="btn-start" class="btn-mision">INICIAR OPERACIÓN</button>
-        <div style="margin-top: 30px;">
-            <h3 style="font-size: 18px; color: #ffca28;">COMBATIENTES EN LÍNEA:</h3>
-            <div id="players-list" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px;"></div>
+        
+        <div style="margin-top: 20px;">
+            <p style="color: #ffca28; font-weight: bold;">COMBATIENTES EN LÍNEA:</p>
+            <div id="players-list" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:5px;"></div>
         </div>
+
+        <button id="btn-reset" class="btn-limpiar">LIMPIAR PARTIDA</button>
     </div>
 
     <div id="game-overlay">
-        <div id="countdown" style="font-size: 250px; color: #ffca28; font-family: 'Playfair Display';">3</div>
-        <div id="question-area" style="display:none; text-align:center; width: 80%;">
-            <h2 id="q-text" style="font-size: 60px; color: #ffca28; margin-bottom: 40px;"></h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;" id="q-options"></div>
-            <div style="width:100%; height:15px; background:#333; margin-top: 50px; border-radius: 10px; overflow:hidden;">
-                <div id="timer-bar" style="width:100%; height:100%; background:#ffca28; transition: width 0.1s linear;"></div>
-            </div>
+        <div id="countdown" style="font-size: 200px; color: #ffca28;">3</div>
+        <div id="question-area" style="display:none; text-align:center;">
+            <h2 id="q-text" style="font-size: 50px; color: #ffca28;"></h2>
+            <div id="timer-bar-cont" style="width:500px; height:15px; background:#333; margin:20px auto;"><div id="timer-bar" style="width:100%; height:100%; background:#ffca28;"></div></div>
         </div>
     </div>
 

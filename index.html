@@ -9,9 +9,21 @@
         .slide-container { width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-size: cover; background-position: center; }
         .active { display: flex; }
         .main-title { font-family: 'Playfair Display'; font-size: 70px; color: #ffca28; text-transform: uppercase; margin: 0; text-shadow: 3px 3px 10px rgba(0,0,0,0.8); }
-        .qr-area { background: white; padding: 20px; border-radius: 15px; margin: 20px; display: inline-block; min-width: 200px; min-height: 200px; }
+        
+        /* Contenedor del QR */
+        .qr-area { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin: 20px auto; 
+            display: block; 
+            width: 200px; 
+            height: 200px; 
+        }
+        
         .btn-mision { background: #8b0000; color: white; padding: 15px 50px; font-size: 24px; border: 3px solid #ffca28; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
         #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
+        #countdown { font-size: 200px; color: #ffca28; font-family: 'Playfair Display'; }
     </style>
 </head>
 <body>
@@ -19,24 +31,30 @@
     <div class="slide-container active" id="s0" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('fondo.jpg');">
         <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
         <p>EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
+        <p style="font-size: 14px; margin-top: 20px; color: #888;">(Presiona flecha derecha para ir al QR)</p>
     </div>
 
     <div class="slide-container" id="s1" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('fondo.jpg');">
         <h2 style="color:#ffca28; font-size: 45px; font-family: 'Playfair Display';">SALA DE MANDO</h2>
+        
         <div id="qrcode" class="qr-area"></div>
+        
         <p>Escanea para unirte a la columna rebelde</p>
         <button id="btn-start" class="btn-mision">INICIAR OPERACIÓN</button>
+        
         <div id="players-list" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;"></div>
     </div>
 
     <div id="game-overlay">
-        <div id="countdown" style="font-size: 200px; color: #ffca28; font-family: 'Playfair Display';">3</div>
+        <div id="countdown">3</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <script>
+        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",
@@ -49,42 +67,26 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Generar QR al cargar
-        window.onload = () => {
-            const urlFinal = window.location.href.replace("index.html", "control.html");
-            new QRCode(document.getElementById("qrcode"), { text: urlFinal, width: 200, height: 200 });
-        };
+        // FUNCIÓN PARA GENERAR EL QR (FORZADA)
+        function generarQR() {
+            const container = document.getElementById("qrcode");
+            container.innerHTML = ""; // Limpiar si había algo
+            
+            // Creamos la URL para el celular (control.html)
+            const urlBase = window.location.href.split('index.html')[0];
+            const urlFinal = urlBase + "control.html";
+            
+            console.log("Generando QR para: ", urlFinal);
+            
+            new QRCode(container, {
+                text: urlFinal,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
 
-        // Iniciar Misión
-        document.getElementById('btn-start').onclick = () => {
-            document.getElementById('game-overlay').style.display = 'flex';
-            let c = 3;
-            const cd = document.getElementById('countdown');
-            const timer = setInterval(() => {
-                c--;
-                if(c > 0) cd.innerText = c;
-                else {
-                    clearInterval(timer);
-                    cd.innerText = "¡YA!";
-                    db.ref('estadoJuego').set({ estado: 'jugando' });
-                    setTimeout(() => { document.getElementById('game-overlay').style.display='none'; }, 1000);
-                }
-            }, 1000);
-        };
-
-        // Pasar diapositivas
-        let cur = 0;
-        window.onkeydown = (e) => {
-            if(e.key === "ArrowRight") {
-                document.getElementById('s'+cur).classList.remove('active');
-                cur++;
-                document.getElementById('s'+cur).classList.add('active');
-            }
-        };
-
-        // Lista de jugadores
-        db.ref('jugadores').on('value', snap => {
-            const list = document.getElementById('players-list');
-            list.innerHTML = "";
-            snap.forEach(child => {
-                list.
+        // Ejecutar al cargar la página
+        window.onload =

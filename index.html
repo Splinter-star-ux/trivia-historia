@@ -2,34 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revolución bajo el sol del Caribe</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>Revolución Cubana - Expo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #0a0a0a; margin: 0; overflow: hidden; color: white; font-family: 'Urbanist', sans-serif; }
+        .slide-container { width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-size: cover; background-position: center; }
+        .active { display: flex; }
+        .main-title { font-family: 'Playfair Display'; font-size: 70px; color: #ffca28; text-transform: uppercase; margin: 0; text-shadow: 3px 3px 10px rgba(0,0,0,0.8); }
+        .qr-area { background: white; padding: 20px; border-radius: 15px; margin: 20px; display: inline-block; min-width: 200px; min-height: 200px; }
+        .btn-mision { background: #8b0000; color: white; padding: 15px 50px; font-size: 24px; border: 3px solid #ffca28; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
+        #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
+    </style>
 </head>
 <body>
-    <div id="game-container">
-        <h1>REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
-        <p class="sub-titulo">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
 
-        <div id="setup">
-            <div id="qrcode" style="background: white; padding: 15px; display: inline-block; margin: 20px; border-radius: 10px;"></div>
-            <p>Escanea para unirte a la columna rebelde</p>
-            <button id="btn-iniciar" style="background: #8b0000; color: white; padding: 15px 30px; cursor: pointer; border: 2px solid #ffca28; font-weight: bold;">INICIAR OPERACIÓN</button>
-        </div>
-
-        <button id="btn-reiniciar" style="background: #333; color: #ccc; margin-top: 20px; padding: 10px; cursor: pointer; border: none;">LIMPIAR PARTIDA</button>
-
-        <div id="ranking">
-            <h3>COMBATIENTES EN LÍNEA:</h3>
-            <ul id="lista-jugadores"></ul>
-        </div>
+    <div class="slide-container active" id="s0" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('fondo.jpg');">
+        <h1 class="main-title">REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
+        <p>EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
     </div>
 
+    <div class="slide-container" id="s1" style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('fondo.jpg');">
+        <h2 style="color:#ffca28; font-size: 45px; font-family: 'Playfair Display';">SALA DE MANDO</h2>
+        <div id="qrcode" class="qr-area"></div>
+        <p>Escanea para unirte a la columna rebelde</p>
+        <button id="btn-start" class="btn-mision">INICIAR OPERACIÓN</button>
+        <div id="players-list" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;"></div>
+    </div>
+
+    <div id="game-overlay">
+        <div id="countdown" style="font-size: 200px; color: #ffca28; font-family: 'Playfair Display';">3</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        // 1. Configuración de Firebase (Sacada de tu imagen)
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",
@@ -39,58 +46,45 @@
             messagingSenderId: "383656491875",
             appId: "1:383656491875:web:d7111a270494cdcb58f156"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const jugadoresRef = db.ref('jugadores');
-        const juegoRef = db.ref('estadoJuego');
 
-        // 2. Generar el QR Automáticamente
-        function crearQR() {
-            const qrDiv = document.getElementById("qrcode");
-            qrDiv.innerHTML = "";
-            const urlMando = window.location.href.replace("index.html", "") + "control.html";
-            
-            new QRCode(qrDiv, {
-                text: urlMando,
-                width: 200,
-                height: 200
-            });
-        }
-
-        // 3. Lógica de los botones
-        document.getElementById('btn-iniciar').onclick = function() {
-            juegoRef.set({ estado: 'jugando' }).then(() => {
-                document.getElementById('setup').innerHTML = "<h2 style='color:#ffca28;'>¡OPERACIÓN EN CURSO!</h2><p>Los rebeldes están atacando...</p>";
-            });
+        // Generar QR al cargar
+        window.onload = () => {
+            const urlFinal = window.location.href.replace("index.html", "control.html");
+            new QRCode(document.getElementById("qrcode"), { text: urlFinal, width: 200, height: 200 });
         };
 
-        document.getElementById('btn-reiniciar').onclick = function() {
-            if(confirm("¿Limpiar todos los datos?")) {
-                jugadoresRef.remove();
-                juegoRef.set({ estado: 'espera' }).then(() => {
-                    location.reload();
-                });
+        // Iniciar Misión
+        document.getElementById('btn-start').onclick = () => {
+            document.getElementById('game-overlay').style.display = 'flex';
+            let c = 3;
+            const cd = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                c--;
+                if(c > 0) cd.innerText = c;
+                else {
+                    clearInterval(timer);
+                    cd.innerText = "¡YA!";
+                    db.ref('estadoJuego').set({ estado: 'jugando' });
+                    setTimeout(() => { document.getElementById('game-overlay').style.display='none'; }, 1000);
+                }
+            }, 1000);
+        };
+
+        // Pasar diapositivas
+        let cur = 0;
+        window.onkeydown = (e) => {
+            if(e.key === "ArrowRight") {
+                document.getElementById('s'+cur).classList.remove('active');
+                cur++;
+                document.getElementById('s'+cur).classList.add('active');
             }
         };
 
-        // 4. Mostrar jugadores
-        jugadoresRef.on('value', (snap) => {
-            const lista = document.getElementById('lista-jugadores');
-            lista.innerHTML = "";
-            snap.forEach((child) => {
-                const li = document.createElement('li');
-                li.style.color = "white";
-                li.innerHTML = "🚩 " + child.val().nombre + " - LISTO";
-                lista.appendChild(li);
-            });
-        });
-
-        // Al cargar la página
-        window.onload = function() {
-            crearQR();
-            juegoRef.set({ estado: 'espera' });
-        };
-    </script>
-</body>
-</html>
+        // Lista de jugadores
+        db.ref('jugadores').on('value', snap => {
+            const list = document.getElementById('players-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                list.

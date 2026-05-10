@@ -1,25 +1,16 @@
-// 1. CONFIGURACIÓN DE FIREBASE (Asegúrate de que sea la misma de tu index.html)
+// 1. CONFIGURACIÓN DE FIREBASE 
+// Asegúrate de que las claves de abajo sean exactamente las tuyas
+const database = firebase.database();
 const jugadoresRef = database.ref('jugadores');
 const juegoRef = database.ref('estadoJuego');
 
-// 2. GENERADOR DE QR FORZADO A CONTROL.HTML
+// 2. GENERADOR DE QR (Hacia control.html)
 const generarQR = () => {
     const qrDiv = document.getElementById("qrcode");
     if (qrDiv) {
         qrDiv.innerHTML = ""; 
-        
-        // Obtenemos la URL actual de la barra de direcciones
-        let urlBase = window.location.href;
-        
-        // Limpiamos si termina en index.html para no duplicar
-        urlBase = urlBase.split('index.html')[0];
-        
-        // Nos aseguramos de que termine en /
-        if (!urlBase.endsWith('/')) {
-            urlBase += '/';
-        }
-        
-        // Forzamos que el QR apunte al mando
+        let urlBase = window.location.href.split('index.html')[0];
+        if (!urlBase.endsWith('/')) urlBase += '/';
         const urlMando = urlBase + 'control.html';
 
         new QRCode(qrDiv, {
@@ -27,38 +18,49 @@ const generarQR = () => {
             width: 180,
             height: 180,
             colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H // Mayor seguridad de lectura
+            colorLight : "#ffffff"
         });
-        
-        console.log("QR GENERADO HACIA: " + urlMando);
+        console.log("QR apunta a: " + urlMando);
     }
 };
 
-// 3. ESCUCHAR JUGADORES EN TIEMPO REAL
+// 3. ESCUCHAR JUGADORES (Aquí estaba el fallo)
+// Usamos 'value' para que cada vez que alguien se una, se limpie y se vuelva a dibujar la lista
 jugadoresRef.on('value', (snapshot) => {
     const lista = document.getElementById('lista-jugadores');
     if (lista) {
-        lista.innerHTML = ""; 
-        snapshot.forEach((childSnapshot) => {
-            const datos = childSnapshot.val();
-            const li = document.createElement('li');
-            // Usamos el estilo que definimos en el CSS
-            li.innerHTML = `🚩 <span>${datos.nombre}</span> - LISTO`;
-            lista.appendChild(li);
-        });
+        lista.innerHTML = ""; // Limpiamos la lista vieja
+        
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                const datos = childSnapshot.val();
+                const li = document.createElement('li');
+                
+                // IMPORTANTE: El mando envía "nombre", así que aquí leemos "datos.nombre"
+                li.innerHTML = `🚩 <span>${datos.nombre.toUpperCase()}</span> - LISTO`;
+                
+                // Estilo rápido para que se vea en el cuadro verde
+                li.style.background = "rgba(139, 0, 0, 0.6)";
+                li.style.margin = "5px";
+                li.style.padding = "10px";
+                li.style.border = "1px solid #ffca28";
+                li.style.display = "inline-block";
+                
+                lista.appendChild(li);
+            });
+        } else {
+            lista.innerHTML = "<p style='color: #aaa;'>Esperando combatientes...</p>";
+        }
     }
 });
 
-// 4. LÓGICA PARA INICIAR LA TRIVIA
+// 4. LÓGICA DE INICIO
 const iniciarTrivia = () => {
     const setupDiv = document.getElementById('setup');
-    
-    // Cambiamos el contenido de la caja principal
     setupDiv.innerHTML = `
-        <div id="pregunta-box" style="animation: aparecer 0.8s ease-out;">
-            <h2 style="color: #ffca28; text-shadow: 2px 2px #000;">MISIÓN 1: EL DESEMBARCO</h2>
-            <p style="font-size: 1.5rem; margin: 20px 0; font-weight: bold; color: white;">
+        <div id="pregunta-box">
+            <h2 style="color: #ffca28;">MISIÓN 1: EL DESEMBARCO</h2>
+            <p style="font-size: 1.5rem; font-weight: bold; color: white;">
                 ¿En qué año desembarcó el yate Granma en las costas de Cuba?
             </p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
@@ -67,27 +69,16 @@ const iniciarTrivia = () => {
                 <div style="background: rgba(139,0,0,0.8); padding: 15px; border: 2px solid #ffca28; color: white;">C) 1959</div>
                 <div style="background: rgba(139,0,0,0.8); padding: 15px; border: 2px solid #ffca28; color: white;">D) 1952</div>
             </div>
-            <p style="margin-top: 30px; font-style: italic; color: #ffca28;">¡Respondan en sus dispositivos!</p>
         </div>
     `;
-    
-    // Avisamos a Firebase que la trivia comenzó
-    juegoRef.set({ 
-        estado: 'jugando', 
-        preguntaActual: 1,
-        timestamp: Date.now()
-    });
+    juegoRef.set({ estado: 'jugando', preguntaActual: 1 });
 };
 
-// 5. CONFIGURACIÓN DEL BOTÓN
-const btnIniciar = document.getElementById('btn-iniciar');
-if (btnIniciar) {
-    btnIniciar.addEventListener('click', () => {
-        iniciarTrivia();
-    });
-}
+// 5. BOTÓN Y CARGA
+document.getElementById('btn-iniciar').addEventListener('click', iniciarTrivia);
 
-// 6. AL CARGAR LA PÁGINA
 window.onload = () => {
     generarQR();
+    // Opcional: Limpiar jugadores al empezar la expo para que no salgan nombres viejos
+    // jugadoresRef.remove(); 
 };

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mando Combatiente</title>
+    <style>
+        body { background: #1a1d13; color: white; text-align: center; font-family: monospace; padding: 20px; }
+        input { padding: 15px; width: 80%; font-size: 18px; margin-bottom: 15px; }
+        button { background: #8b0000; color: white; padding: 15px; width: 85%; border: none; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <h1>MANDO REVOLUCIONARIO</h1>
+    <input type="text" id="nombreInput" placeholder="Tu nombre">
+    <br>
+    <button onclick="unirse()">UNIRSE A LA LUCHA</button>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAihdShTcUkthaEwx1dXLNM_D0jQWVsNUs",
+        authDomain: "historia-revoluc.firebaseapp.com",
+        databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
+        projectId: "historia-revoluc",
+        storageBucket: "historia-revoluc.firebasestorage.app",
+        messagingSenderId: "383656491875",
+        appId: "1:383656491875:web:ff64b6e7997a889358f156"
+      };
+      
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      function unirse() {
+          const nombre = document.getElementById('nombreInput').value;
+          if(nombre) {
+              database.ref('jugadores/' + nombre).set({
+                  nombre: nombre,
+                  puntos: 0
+              });
+              alert("¡Unido a la Sierra!");
+          }
+      }
+    </script>
+</body>
+</html>

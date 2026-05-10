@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revolución bajo el sol del Caribe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,14 +13,12 @@
         <p class="sub-titulo">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
 
         <div id="setup">
-            <div id="qrcode" style="display: flex; justify-content: center; margin: 20px; min-height: 180px;"></div>
+            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; margin: 20px; min-width: 180px; min-height: 180px;"></div>
             <p>Escanea para unirte a la columna rebelde</p>
             <button id="btn-iniciar">INICIAR OPERACIÓN</button>
         </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #444;">
-
-        <button id="btn-reiniciar" style="background: #444; color: white; padding: 10px; font-size: 0.8rem; cursor: pointer; border: 1px solid #666;">LIMPIAR PARTIDA</button>
+        <button id="btn-reiniciar" style="background: #444; color: white; margin-top: 20px; cursor: pointer;">LIMPIAR PARTIDA</button>
 
         <div id="ranking">
             <h3>COMBATIENTES EN LÍNEA:</h3>
@@ -29,10 +28,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        // Configuración de tu proyecto historia-revoluc
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",

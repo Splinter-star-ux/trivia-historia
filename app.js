@@ -1,36 +1,38 @@
 const jugadoresRef = database.ref('jugadores');
 const juegoRef = database.ref('estadoJuego');
 
-// Reiniciar estado de juego al cargar la página en PC
+// Limpiar estado al cargar
 juegoRef.set({ estado: 'espera' });
 
-const generarQR = () => {
+function generarQR() {
     const qrDiv = document.getElementById("qrcode");
-    if (qrDiv) {
-        qrDiv.innerHTML = ""; // Limpiar antes de generar
-        
-        let urlBase = window.location.href.split('index.html')[0];
-        if (!urlBase.endsWith('/')) urlBase += '/';
-        const urlMando = urlBase + 'control.html';
+    if (!qrDiv) return;
 
+    qrDiv.innerHTML = ""; // Limpiar el cuadro blanco
+    
+    // Obtenemos la URL de tu GitHub Pages automáticamente
+    let urlMando = window.location.href.replace("index.html", "") + "control.html";
+    
+    try {
         new QRCode(qrDiv, {
             text: urlMando,
             width: 180,
             height: 180,
             colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
+            colorLight : "#ffffff"
         });
-        console.log("QR listo para: " + urlMando);
+        console.log("QR generado para: " + urlMando);
+    } catch (e) {
+        console.error("Error al crear QR, reintentando...", e);
     }
-};
+}
 
-// Escuchar y mostrar jugadores
-jugadoresRef.on('value', (snapshot) => {
+// Escuchar jugadores
+jugadoresRef.on('value', (snap) => {
     const lista = document.getElementById('lista-jugadores');
     if (lista) {
-        lista.innerHTML = ""; 
-        snapshot.forEach((child) => {
+        lista.innerHTML = "";
+        snap.forEach((child) => {
             const li = document.createElement('li');
             li.innerHTML = `🚩 <span>${child.val().nombre}</span> - LISTO`;
             lista.appendChild(li);
@@ -38,30 +40,22 @@ jugadoresRef.on('value', (snapshot) => {
     }
 });
 
-// Acción de iniciar operación
-const btnIniciar = document.getElementById('btn-iniciar');
-if(btnIniciar) {
-    btnIniciar.onclick = () => {
-        document.getElementById('setup').innerHTML = `
-            <h2 style="color:#ffca28;">¡MISIÓN EN CURSO!</h2>
-            <p>Atención a los mandos móviles.</p>
-        `;
-        juegoRef.set({ estado: 'jugando' });
-    };
-}
+// Botones
+document.getElementById('btn-iniciar').onclick = () => {
+    document.getElementById('setup').innerHTML = "<h2>¡MISIÓN INICIADA!</h2><p>Revisa tu celular</p>";
+    juegoRef.set({ estado: 'jugando' });
+};
 
-// Acción de reiniciar (Limpiar base de datos)
 document.getElementById('btn-reiniciar').onclick = () => {
-    if(confirm("¿Quieres borrar a todos los reclutas y reiniciar la sala?")) {
+    if(confirm("¿Reiniciar sala?")) {
         jugadoresRef.remove();
         juegoRef.set({ estado: 'espera' });
-        setTimeout(() => { location.reload(); }, 500);
+        location.reload();
     }
 };
 
-// Asegurar que el QR se genere al cargar
+// FUERZA EL QR AL CARGAR Y 1 SEGUNDO DESPUÉS
 window.onload = () => {
     generarQR();
-    // Reintento de seguridad un segundo después
-    setTimeout(generarQR, 1000);
+    setTimeout(generarQR, 1000); 
 };

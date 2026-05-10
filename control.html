@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body { background: #2b3020; color: white; text-align: center; padding: 20px; font-family: sans-serif; }
-        input { padding: 15px; width: 85%; margin: 20px 0; border: none; border-radius: 5px; font-size: 1.1rem; }
-        button { background: #8b0000; color: white; padding: 15px; border: 2px solid #ffca28; width: 90%; font-weight: bold; cursor: pointer; }
-        .opcion { background: #3e4431; margin: 10px 0; border: 1px solid #ffca28; }
+        input { padding: 15px; width: 85%; margin: 20px 0; border-radius: 5px; border: none; }
+        button { background: #8b0000; color: white; padding: 15px; border: 2px solid #ffca28; width: 90%; font-weight: bold; }
+        .opcion { background: #3e4431; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -21,16 +21,16 @@
         </div>
 
         <div id="pantalla-espera" style="display:none;">
-            <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
-            <p>Espera a que el Comandante inicie la operación.</p>
-            <div style="font-size: 4rem; margin-top: 20px;">⭐</div>
+            <h2 style="color:#ffca28;">¡DENTRO DE LA COLUMNA!</h2>
+            <p>Mantente alerta. El Comandante iniciará la operación pronto.</p>
+            <div style="font-size: 3rem;">⭐</div>
         </div>
 
         <div id="pantalla-juego" style="display:none;">
             <h2 style="color:#ffca28;">¡FUEGO!</h2>
-            <button class="opcion" onclick="enviar('A')">A</button>
-            <button class="opcion" onclick="enviar('B')">B</button>
-            <button class="opcion" onclick="enviar('C')">C</button>
+            <button class="opcion" onclick="alert('Enviado A')">OPCIÓN A</button>
+            <button class="opcion" onclick="alert('Enviado B')">OPCIÓN B</button>
+            <button class="opcion" onclick="alert('Enviado C')">OPCIÓN C</button>
         </div>
     </div>
 
@@ -47,9 +47,10 @@
             messagingSenderId: "383656491875",
             appId: "1:383656491875:web:d7111a270494cdcb58f156"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        let yaRegistrado = false;
 
         document.getElementById('btn-unirse').onclick = () => {
             const nom = document.getElementById('nombre').value.trim();
@@ -57,17 +58,23 @@
                 db.ref('jugadores').push({ nombre: nom });
                 document.getElementById('pantalla-registro').style.display = 'none';
                 document.getElementById('pantalla-espera').style.display = 'block';
+                yaRegistrado = true;
             }
         };
 
+        // ESCUCHAR AL COMANDANTE
         db.ref('estadoJuego').on('value', (snap) => {
-            if(snap.val() && snap.val().estado === 'jugando') {
-                document.getElementById('pantalla-espera').style.display = 'none';
-                document.getElementById('pantalla-juego').style.display = 'block';
+            const data = snap.val();
+            if (yaRegistrado) {
+                if (data && data.estado === 'jugando') {
+                    document.getElementById('pantalla-espera').style.display = 'none';
+                    document.getElementById('pantalla-juego').style.display = 'block';
+                } else {
+                    document.getElementById('pantalla-espera').style.display = 'block';
+                    document.getElementById('pantalla-juego').style.display = 'none';
+                }
             }
         });
-
-        function enviar(letra) { alert("Respuesta " + letra + " registrada."); }
     </script>
 </body>
 </html>

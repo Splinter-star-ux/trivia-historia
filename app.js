@@ -1,47 +1,47 @@
-const jugadoresRef = database.ref('jugadores');
-const juegoRef = database.ref('estadoJuego');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revolución bajo el sol del Caribe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1>REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
+        <p class="sub-titulo">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
 
-// Generar QR hacia el mando
-const generarQR = () => {
-    const qrDiv = document.getElementById("qrcode");
-    if (qrDiv) {
-        qrDiv.innerHTML = ""; 
-        let urlBase = window.location.href.split('index.html')[0];
-        if (!urlBase.endsWith('/')) urlBase += '/';
-        const urlMando = urlBase + 'control.html';
-
-        new QRCode(qrDiv, {
-            text: urlMando,
-            width: 180,
-            height: 180
-        });
-        console.log("QR listo hacia: " + urlMando);
-    }
-};
-
-// Escuchar quién se conecta
-jugadoresRef.on('value', (snapshot) => {
-    const lista = document.getElementById('lista-jugadores');
-    if (lista) {
-        lista.innerHTML = ""; 
-        snapshot.forEach((child) => {
-            const li = document.createElement('li');
-            li.innerHTML = `🚩 <span>${child.val().nombre}</span> - LISTO`;
-            lista.appendChild(li);
-        });
-    }
-});
-
-// Botón de inicio
-document.getElementById('btn-iniciar').addEventListener('click', () => {
-    document.getElementById('setup').innerHTML = `
-        <div style="padding:20px; border:2px solid #ffca28; background:rgba(0,0,0,0.5);">
-            <h2 style="color:#ffca28;">MISIÓN 1: EL DESEMBARCO</h2>
-            <p style="font-size:1.5rem; color:white;">¿En qué año desembarcó el Granma?</p>
+        <div id="setup">
+            <div id="qrcode" style="display: flex; justify-content: center; margin: 20px;"></div>
+            <p>Escanea para unirte a la columna rebelde</p>
+            <button id="btn-iniciar">INICIAR OPERACIÓN</button>
+            <br>
+            <button id="btn-reiniciar" style="background: #444; margin-top: 15px; font-size: 0.8rem;">LIMPIAR PARTIDAAnterior</button>
         </div>
-    `;
-    juegoRef.set({ estado: 'jugando' });
-});
 
-// Arrancar QR al cargar
-window.onload = generarQR;
+        <div id="ranking">
+            <h3>COMBATIENTES EN LÍNEA:</h3>
+            <ul id="lista-jugadores"></ul>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
+            authDomain: "historia-revoluc.firebaseapp.com",
+            databaseURL: "https://historia-revoluc-default-rtdb.firebaseio.com",
+            projectId: "historia-revoluc",
+            storageBucket: "historia-revoluc.firebasestorage.app",
+            messagingSenderId: "383656491875",
+            appId: "1:383656491875:web:d7111a270494cdcb58f156"
+        };
+        firebase.initializeApp(firebaseConfig);
+        window.database = firebase.database();
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

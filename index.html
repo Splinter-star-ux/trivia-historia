@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia: Revolución Cubana</title>
+    <title>Revolución bajo el sol del Caribe</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-container">
-        <h1>Revolucion bajo el sol del caribe</h1>
-        <p class="sub-titulo">la revolucion cubana : el impacto que transformo a cuba</p>
+        <h1>REVOLUCIÓN BAJO EL SOL DEL CARIBE</h1>
+        <p class="sub-titulo">LA REVOLUCIÓN CUBANA: EL IMPACTO QUE TRANSFORMÓ A CUBA</p>
 
         <div id="setup">
             <div id="qrcode" style="display: flex; justify-content: center; margin: 20px;"></div>
             <p>Escanea para unirte a la columna rebelde</p>
             <button id="btn-iniciar">INICIAR OPERACIÓN</button>
+            <br>
+            <button id="btn-reiniciar" style="background: #444; margin-top: 15px; font-size: 0.8rem;">LIMPIAR PARTIDAAnterior</button>
         </div>
 
         <div id="ranking">
@@ -28,7 +30,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-        // Tus credenciales de historia-revoluc
         const firebaseConfig = {
             apiKey: "AIzaSyAihdShTcUktHAewx1dXLNM_D0jQWVsNUs",
             authDomain: "historia-revoluc.firebaseapp.com",
@@ -38,11 +39,9 @@
             messagingSenderId: "383656491875",
             appId: "1:383656491875:web:d7111a270494cdcb58f156"
         };
-        
         firebase.initializeApp(firebaseConfig);
         window.database = firebase.database();
     </script>
-    
     <script src="app.js"></script>
 </body>
 </html>

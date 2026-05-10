@@ -11,22 +11,24 @@
 
     <div class="overlay">
         <div id="registro">
-            <h2 style="color:#ffca28;">NOMBRE DEL REBELDE</h2>
-            <input type="text" id="nombre" style="padding:15px; width:80%; border-radius:10px; border:none; margin-bottom:20px;">
-            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #ffca28; border-radius:10px;">UNIRSE</button>
+            <h2 style="color:#ffca28; font-size: 24px;">UNIRSE A LA COLUMNA</h2>
+            <input type="text" id="nombre" placeholder="TU NOMBRE / ALIAS" style="padding:15px; width:80%; border-radius:5px; border:none; margin-bottom:20px; text-align:center;">
+            <button id="btn-unirse" style="background:#8b0000; color:white; padding:15px 40px; border:2px solid #ffca28; font-weight:bold; width:80%;">ENTRAR EN COMBATE</button>
         </div>
 
-        <div id="espera" style="display:none;">
+        <div id="espera" style="display:none; text-align:center;">
             <h2 style="color:#ffca28;">¡EN POSICIÓN!</h2>
-            <p>Espera a que inicie la operación...</p>
+            <p>Espera órdenes del Comandante...</p>
+            <div style="font-size: 60px; margin-top: 20px;">🚩</div>
         </div>
 
         <div id="juego" style="display:none;">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:90%;">
-                <button onclick="enviar('A')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">A</button>
-                <button onclick="enviar('B')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">B</button>
-                <button onclick="enviar('C')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">C</button>
-                <button onclick="enviar('D')" style="height:100px; font-size:30px; background:rgba(255,255,255,0.2); border:2px solid white; color:white;">D</button>
+            <h2 style="color:#ffca28; margin-bottom:20px;">¡FUEGO!</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:90vw;">
+                <button onclick="enviar('A')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">A</button>
+                <button onclick="enviar('B')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">B</button>
+                <button onclick="enviar('C')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">C</button>
+                <button onclick="enviar('D')" style="height:120px; font-size:40px; background:rgba(255,255,255,0.1); border:2px solid white; color:white;">D</button>
             </div>
         </div>
     </div>

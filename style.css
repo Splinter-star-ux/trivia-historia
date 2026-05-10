@@ -1,35 +1,31 @@
-/* Configuración General */
+/* style.css */
 body { margin: 0; font-family: 'Urbanist', sans-serif; color: white; }
 
 /* CAPA DE FONDO DINÁMICA PARA EL CELULAR */
 #bg-layer {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     background-size: cover;
     background-position: center;
     z-index: -1;
     transition: 0.5s ease;
 }
 
-/* 1. Fondo en ESPERA (GIF) */
+/* AQUÍ PONES EL GIF QUE ME DIJISTE */
 .espera-bg { 
-    background-image:figura.gif
+    background-image:https://media.tenor.com/S2NmOE9HEPcAAAAM/sussa.gif
 }
 
-/* 2. Fondo en JUEGO (Imagen Estática) */
+/* FOTO DE JUEGO */
 .juego-bg { 
-    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('fondo.jpg'); 
+    background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('fondo.jpg'); 
 }
 
-/* Overlay para que el contenido sea legible */
 .overlay {
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0,0,0,0.5);
 }
